@@ -39,7 +39,7 @@ App.DB = {
 
     getByIdSync: function (id) { 
         if (!this._membersCache) return null;
-        return this._membersCache.find(function (m) { return m.id === id; }) || null; 
+        return this._membersCache.find(function (m) { return m.id == id; }) || null; 
     },
 
     _syncFromSupabase: async function() {
@@ -70,7 +70,7 @@ App.DB = {
     },
     getById: async function (id) { 
         const items = await this.getAll();
-        return items.find(function (m) { return m.id === id; }) || null; 
+        return items.find(function (m) { return m.id == id; }) || null; 
     },
 
     create: function (member) {
