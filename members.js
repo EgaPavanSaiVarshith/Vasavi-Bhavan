@@ -56,9 +56,9 @@ App.Members = {
     confirmDelete: function (id) { this.deleteId = id; document.getElementById('deleteModal').classList.add('show'); },
     _hideDelete: function () { document.getElementById('deleteModal').classList.remove('show'); this.deleteId = null; },
 
-    // ===== PRINT INDIVIDUAL FORM =====
-    printForm: async function (id) {
-        var m = await App.DB.getById(id); if (!m) return;
+    // ===== PRINT INDIVIDUAL RECEIPT (Instant Synchronous Download) =====
+    printForm: function (id) {
+        var m = App.DB.getByIdSync(id); if (!m) return;
         var esc = App.Utils.escapeHtml, fd = App.Utils.formatDateLong;
         var photoUrl = m.photo || m.photoFile;
         var aadhaarUrl = m.aadhaar || m.aadhaarFile;

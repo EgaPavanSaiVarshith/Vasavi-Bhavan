@@ -37,6 +37,11 @@ App.DB = {
         return await this._syncFromSupabase();
     },
 
+    getByIdSync: function (id) { 
+        if (!this._membersCache) return null;
+        return this._membersCache.find(function (m) { return m.id === id; }) || null; 
+    },
+
     _syncFromSupabase: async function() {
         if (!supabaseClient) this.init();
         const { data, error } = await supabaseClient.from(this.key).select('*');
@@ -61,11 +66,6 @@ App.DB = {
         // Save fresh copy to LocalStorage for next time
         localStorage.setItem(this.key, JSON.stringify(this._membersCache));
 
-        // If the app is already running, trigger a silent re-render to show new data
-        if (window.App && window.App.refreshAll && !this._isSyncing) {
-            this._isSyncing = true;
-            setTimeout(() => { window.App.refreshAll(); this._isSyncing = false; }, 300);
-        }
         return this._membersCache;
     },
     getById: async function (id) { 
