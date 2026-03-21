@@ -1,3 +1,6 @@
+/* ================================================================
+   MEMBER REGISTRATION FORM MODULE v2 — Multi-step, Supabase, Validation
+   ================================================================ */
 var App = window.App || {};
 App.Form = {
     editingId: null,
@@ -13,257 +16,159 @@ App.Form = {
 
         // Type selection
         document.getElementById('typeNew').addEventListener('click', function () { self._showForm('new'); });
-        document.getElementById('typeUpdate').addEventListener('click', function () { self._showUpdateSearch(); });
-        document.getElementById('backFromSearch').addEventListener('click', function () { self._showStep1(); });
-        document.getElementById('backFromForm').addEventListener('click', function () { self._showStep1(); });
+        document.getElementById('typeUpdate').addEventListener('click', function () { self._showForm('update'); });
+        
+        // Search
+        document.getElementById('searchBtn').addEventListener('click', function () { self._searchMember(); });
+        document.getElementById('skipSearchBtn').addEventListener('click', function () { self._showForm('update', null); });
 
-        // Update search
-        document.getElementById('searchMemberBtn').addEventListener('click', function () { self._searchMember(); });
-        document.getElementById('searchMobile').addEventListener('keydown', function (e) { if (e.key === 'Enter') self._searchMember(); });
-        document.getElementById('searchMobile').addEventListener('input', function () { this.value = this.value.replace(/[^0-9]/g, ''); });
+        // Navigation
+        document.getElementById('nextStep1').addEventListener('click', function () { if (self.validate()) self._showStep2(); });
+        document.getElementById('prevStep2').addEventListener('click', function () { self._showStep1(); });
 
-        // Form
-        document.getElementById('memberForm').addEventListener('submit', function (e) { e.preventDefault(); self.handleSubmit(); });
-        document.getElementById('formReset').addEventListener('click', function () { self.resetForm(); });
-        document.getElementById('mobileNumber').addEventListener('input', function () { this.value = this.value.replace(/[^0-9]/g, ''); });
-
-        // File uploads
+        // Setup uploads
         this._setupUpload('photoZone', 'photoFile', 'photoPlaceholder', 'photoPreview', 'photoImg', 'photoFileName', 'removePhoto', 'photo');
         this._setupUpload('aadhaarZone', 'aadhaarFile', 'aadhaarPlaceholder', 'aadhaarPreview', 'aadhaarImg', 'aadhaarFileName', 'removeAadhaar', 'aadhaar');
         this._setupUpload('paymentZone', 'paymentFile', 'paymentPlaceholder', 'paymentPreview', 'paymentImg', 'paymentFileName', 'removePayment', 'payment');
 
-        // Clear errors on input
-        document.querySelectorAll('#memberForm input, #memberForm select, #memberForm textarea').forEach(function (el) {
-            el.addEventListener('input', function () { var fg = this.closest('.form-group'); if (fg) fg.classList.remove('has-error'); });
+        // Form submit
+        document.getElementById('memberForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            self.handleSubmit();
         });
-    },
-
-    _showStep1: function () {
-        document.getElementById('regStep1').style.display = 'block';
-        document.getElementById('regStep2a').style.display = 'none';
-        document.getElementById('regStep2b').style.display = 'none';
-        this.resetForm();
-    },
-
-    _showUpdateSearch: function () {
-        document.getElementById('regStep1').style.display = 'none';
-        document.getElementById('regStep2a').style.display = 'block';
-        document.getElementById('regStep2b').style.display = 'none';
-        document.getElementById('searchMobile').value = '';
-        var res = document.getElementById('searchResult');
-        res.innerHTML = '<div style="margin-top:24px; padding-top:24px; border-top:1px solid var(--c-border); text-align:center"><p style="font-size:0.88rem; color:var(--c-text-muted); margin-bottom:12px">Data not in the system yet?</p><button class="btn btn-outline" id="skipSearchBtn">Enter Details Directly</button></div>';
-        document.getElementById('skipSearchBtn').addEventListener('click', function () { App.Form._showForm('update', null); });
-        document.getElementById('searchMobile').focus();
     },
 
     _showForm: function (type, member) {
         this.regType = type;
-        document.getElementById('regType').value = type;
-        document.getElementById('regStep1').style.display = 'none';
-        document.getElementById('regStep2a').style.display = 'none';
-        document.getElementById('regStep2b').style.display = 'block';
-
-        // Show/hide payment and disclaimer
-        document.getElementById('paymentSection').style.display = type === 'new' ? 'block' : 'none';
-        document.getElementById('disclaimerSection').style.display = type === 'new' ? 'block' : 'none';
-
-        // Show committee fields ONLY for update/edit flows
-        var comSec = document.getElementById('committeeUpdateSection');
-        if (comSec) {
-            comSec.style.display = (type === 'update' || type === 'edit') ? 'block' : 'none';
-        }
-
+        this.resetForm();
+        document.getElementById('selectionScreen').style.display = 'none';
+        document.getElementById('searchScreen').style.display = type === 'update' && !member ? 'block' : 'none';
+        document.getElementById('formScreen').style.display = type === 'new' || member ? 'block' : 'none';
+        
         if (type === 'new') {
             document.getElementById('formTitle').textContent = 'New Member Registration';
-            document.getElementById('formSubtitle').textContent = 'Fill in the details below to register as a new member';
-            document.getElementById('submitBtnText').textContent = 'Submit Registration';
-        } else if (type === 'update' && member) {
-            this.editingId = member.id;
-            document.getElementById('editMemberId').value = member.id;
-            document.getElementById('formTitle').textContent = 'Update Member Details';
-            document.getElementById('formSubtitle').textContent = 'Update details for ' + member.memberName;
-            document.getElementById('submitBtnText').textContent = 'Update Details';
-            this._fillForm(member);
-        } else if (type === 'update' && !member) {
-            this.resetForm();
-            this.regType = 'update';
-            document.getElementById('formTitle').textContent = 'Existing Member Details';
-            document.getElementById('formSubtitle').textContent = 'Enter your details into the digital system';
-            document.getElementById('submitBtnText').textContent = 'Save Details';
-            document.getElementById('paymentSection').style.display = 'none';
-            document.getElementById('disclaimerSection').style.display = 'none';
-        } else if (type === 'edit' && member) {
-            this.editingId = member.id;
-            this.regType = 'edit';
-            document.getElementById('editMemberId').value = member.id;
-            document.getElementById('formTitle').textContent = 'Edit Member';
-            document.getElementById('formSubtitle').textContent = 'Editing ' + member.memberName;
+            document.getElementById('formSubtitle').textContent = 'Complete the form below to apply for membership';
+            document.getElementById('submitBtnText').textContent = 'Submit Application';
+            document.getElementById('committeeUpdateSection').style.display = 'none';
+        } else if (member) {
+            document.getElementById('formTitle').textContent = 'Update Membership';
+            document.getElementById('formSubtitle').textContent = 'Editing ' + (member.name || member.memberName);
             document.getElementById('submitBtnText').textContent = 'Save Changes';
             document.getElementById('paymentSection').style.display = 'none';
             document.getElementById('disclaimerSection').style.display = 'none';
             this._fillForm(member);
         }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
 
+    _showStep1: function () {
+        document.getElementById('step1').style.display = 'block';
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('indicator1').classList.add('active');
+        document.getElementById('indicator2').classList.remove('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    _showStep2: function () {
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'block';
+        document.getElementById('indicator1').classList.add('active');
+        document.getElementById('indicator2').classList.add('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
     _fillForm: function (m) {
-        document.getElementById('memberName').value = m.memberName || '';
+        this.editingId = m.id;
+        document.getElementById('memberName').value = m.name || m.memberName || '';
         document.getElementById('dob').value = m.dob || '';
-        document.getElementById('fatherName').value = m.fatherName || '';
-        document.getElementById('spouseName').value = m.spouseName || '';
+        document.getElementById('fatherName').value = m.father_name || m.fatherName || '';
+        document.getElementById('spouseName').value = m.spouse_name || m.spouseName || '';
         document.getElementById('gothram').value = m.gothram || '';
-        document.getElementById('bloodGroup').value = m.bloodGroup || '';
-        document.getElementById('marriageDay').value = m.marriageDay || '';
+        document.getElementById('bloodGroup').value = m.blood_group || m.bloodGroup || '';
+        document.getElementById('marriageDay').value = m.marriage_day || m.marriageDay || '';
         document.getElementById('address').value = m.address || '';
-        document.getElementById('mobileNumber').value = m.mobileNumber || '';
+        document.getElementById('mobileNumber').value = m.phone || m.mobileNumber || '';
+        
         var pp = document.getElementById('presentPost'); if (pp) pp.value = m.presentPost || '';
         var prevp = document.getElementById('previousPost'); if (prevp) prevp.value = m.previousPost || '';
 
-        // Restore uploaded files if present
-        if (m.photoFile) {
-            this.photoData = m.photoFile;
-            document.getElementById('photoPreview').style.display = 'block';
-            document.getElementById('photoPlaceholder').style.display = 'none';
-            document.getElementById('photoImg').src = m.photoFile;
-            document.getElementById('photoFileName').textContent = 'Photo uploaded';
+        // Restore uploads
+        if (m.photo || m.photoData || m.photoFile) {
+            this.photoData = m.photo || m.photoData || m.photoFile;
+            this._showPreview('photo', this.photoData);
         }
-        if (m.aadhaarFile) {
-            this.aadhaarData = m.aadhaarFile;
-            document.getElementById('aadhaarPreview').style.display = 'block';
-            document.getElementById('aadhaarPlaceholder').style.display = 'none';
-            document.getElementById('aadhaarImg').src = m.aadhaarFile;
-            document.getElementById('aadhaarFileName').textContent = 'Aadhaar uploaded';
+        if (m.aadhaar || m.aadhaarFile) {
+            this.aadhaarData = m.aadhaar || m.aadhaarFile;
+            this._showPreview('aadhaar', this.aadhaarData);
+        }
+        if (m.payment_proof || m.paymentProof) {
+            this.paymentData = m.payment_proof || m.paymentProof;
+            this._showPreview('payment', this.paymentData);
         }
     },
 
-    _searchMember: function () {
+    _showPreview: function(key, data) {
+        var pv = document.getElementById(key + 'Preview'), ph = document.getElementById(key + 'Placeholder'), img = document.getElementById(key + 'Img');
+        if (pv) pv.style.display = 'block'; if (ph) ph.style.display = 'none'; if (img) img.src = data;
+    },
+
+    _searchMember: async function () {
         var mobile = document.getElementById('searchMobile').value.trim();
         var result = document.getElementById('searchResult');
-
         if (!mobile || mobile.length !== 10) {
-            result.innerHTML = '<div class="search-not-found">⚠️ Please enter a valid 10-digit mobile number</div>';
+            result.innerHTML = '<div class="search-not-found">⚠️ Please enter a 10-digit mobile number</div>';
             return;
         }
-
-        var member = App.DB.findByMobile(mobile);
+        var member = await App.DB.findByMobile(mobile);
         if (member) {
-            result.innerHTML = '<div class="search-found">✅ Member found: <strong>' + App.Utils.escapeHtml(member.memberName) + '</strong><br><small>Gothram: ' + App.Utils.escapeHtml(member.gothram) + ' • Status: ' + member.status + '</small><br><br><button class="btn btn-primary btn-sm" id="loadFoundMember">Load & Edit Details</button></div>';
-            document.getElementById('loadFoundMember').addEventListener('click', function () {
-                App.Form._showForm('update', member);
-            });
+            result.innerHTML = '<div class="search-found">✅ Member found: <strong>' + App.Utils.escapeHtml(member.memberName) + '</strong><br><small>Gothram: ' + App.Utils.escapeHtml(member.gothram) + '</small><br><br><button class="btn btn-primary btn-sm" id="loadFoundMember">Load Details</button></div>';
+            document.getElementById('loadFoundMember').addEventListener('click', () => this._showForm('update', member));
         } else {
-            result.innerHTML = '<div class="search-not-found">❌ No member found with mobile number ' + mobile + '</div><div style="margin-top:24px; padding-top:24px; border-top:1px solid var(--c-border); text-align:center"><p style="font-size:0.88rem; color:var(--c-text-muted); margin-bottom:12px">Data not in the system yet?</p><button class="btn btn-outline" id="skipSearchBtn2">Enter Details Directly</button></div>';
-            document.getElementById('skipSearchBtn2').addEventListener('click', function () { App.Form._showForm('update', null); });
+            result.innerHTML = '<div class="search-not-found">❌ No member found with mobile ' + mobile + '</div><br><button class="btn btn-outline btn-sm" onclick="App.Form._showForm(\'update\', null)">Enter Details Directly</button>';
         }
     },
 
-    // ===== FILE UPLOAD SETUP =====
     _setupUpload: function (zoneId, inputId, placeholderId, previewId, imgId, nameId, removeId, dataKey) {
-        var self = this;
-        var zone = document.getElementById(zoneId);
-        var input = document.getElementById(inputId);
-        var placeholder = document.getElementById(placeholderId);
-        var preview = document.getElementById(previewId);
-        var img = document.getElementById(imgId);
-        var nameEl = document.getElementById(nameId);
-        var removeBtn = document.getElementById(removeId);
+        var self = this, zone = document.getElementById(zoneId), input = document.getElementById(inputId);
+        var ph = document.getElementById(placeholderId), pv = document.getElementById(previewId), img = document.getElementById(imgId), nameEl = document.getElementById(nameId), rm = document.getElementById(removeId);
 
-        // Click to upload
-        zone.addEventListener('click', function (e) {
-            if (e.target.closest('.remove-upload')) return;
-            input.click();
-        });
-
-        // File selected
-        input.addEventListener('change', function () { if (this.files[0]) self._processFile(this.files[0], dataKey, placeholder, preview, img, nameEl); });
-
-        // Drag & drop
-        zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
-        zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
-        zone.addEventListener('drop', function (e) {
-            e.preventDefault(); zone.classList.remove('dragover');
-            if (e.dataTransfer.files[0]) self._processFile(e.dataTransfer.files[0], dataKey, placeholder, preview, img, nameEl);
-        });
-
-        // Remove
-        removeBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            self[dataKey + 'Data'] = null; input.value = '';
-            preview.style.display = 'none'; placeholder.style.display = 'block';
-        });
+        zone.onclick = (e) => { if (!e.target.closest('.remove-upload')) input.click(); };
+        input.onchange = () => { if (input.files[0]) this._processFile(input.files[0], dataKey, ph, pv, img, nameEl); };
+        rm.onclick = (e) => { e.stopPropagation(); this[dataKey+'Data'] = null; input.value = ''; pv.style.display = 'none'; ph.style.display = 'block'; };
     },
 
-    _processFile: function (file, dataKey, placeholder, preview, img, nameEl) {
-        if (file.size > 2 * 1024 * 1024) { App.toast('File too large. Max 2 MB allowed.', 'error'); return; }
-        var self = this;
+    _processFile: function (file, dataKey, ph, pv, img, nameEl) {
+        if (file.size > 2 * 1024 * 1024) { App.toast('File too large (Max 2MB)', 'error'); return; }
         var reader = new FileReader();
-        reader.onload = function (e) {
-            self[dataKey + 'Data'] = e.target.result;
-            if (file.type.startsWith('image/')) {
-                img.src = e.target.result; img.style.display = 'block';
-            } else {
-                img.style.display = 'none';
-            }
-            nameEl.textContent = file.name;
-            preview.style.display = 'block'; placeholder.style.display = 'none';
+        reader.onload = (e) => {
+            this[dataKey + 'Data'] = e.target.result;
+            img.src = e.target.result; nameEl.textContent = 'File selected';
+            pv.style.display = 'block'; ph.style.display = 'none';
         };
         reader.readAsDataURL(file);
     },
 
-    // ===== VALIDATE =====
     validate: function () {
-        var valid = true;
         var rules = [
-            { id: 'memberName', msg: 'Member name is required' }, { id: 'dob', msg: 'Date of birth is required' },
-            { id: 'fatherName', msg: "Father's name is required" }, { id: 'gothram', msg: 'Gothram is required' },
+            { id: 'memberName', msg: 'Name is required' }, { id: 'dob', msg: 'DOB is required' },
+            { id: 'fatherName', msg: 'Father name is required' }, { id: 'gothram', msg: 'Gothram is required' },
             { id: 'bloodGroup', msg: 'Blood group is required' }, { id: 'address', msg: 'Address is required' },
             { id: 'mobileNumber', msg: 'Mobile number is required' }
         ];
-
-        document.querySelectorAll('#memberForm .form-group').forEach(function (fg) { fg.classList.remove('has-error'); });
-
-        rules.forEach(function (r) {
-            var el = document.getElementById(r.id), fg = document.getElementById('fg-' + r.id);
-            var err = fg ? fg.querySelector('.fg-error') : null;
-            if (!el.value.trim()) { valid = false; if (fg) fg.classList.add('has-error'); if (err) err.textContent = r.msg; }
+        var valid = true;
+        document.querySelectorAll('.form-group').forEach(fg => fg.classList.remove('has-error'));
+        rules.forEach(r => {
+            var el = document.getElementById(r.id);
+            if (!el.value.trim()) {
+                var fg = document.getElementById('fg-' + r.id); if (fg) fg.classList.add('has-error');
+                valid = false;
+            }
         });
-
-        var mob = document.getElementById('mobileNumber').value.trim();
-        if (mob && !/^[0-9]{10}$/.test(mob)) {
-            valid = false; var fg = document.getElementById('fg-mobileNumber');
-            if (fg) { fg.classList.add('has-error'); fg.querySelector('.fg-error').textContent = 'Enter valid 10-digit number'; }
-        }
-
-        var pZone = document.getElementById('photoZone');
-        if (!this.photoData && !this.editingId) {
-            valid = false;
-            if (pZone) { pZone.style.borderColor = 'var(--c-error)'; pZone.style.boxShadow = '0 0 0 3px rgba(255,82,82,.12)'; }
-        } else {
-            if (pZone) { pZone.style.borderColor = ''; pZone.style.boxShadow = ''; }
-        }
-
-        // Terms checkbox (new registration only)
-        if (this.regType === 'new') {
-            var terms = document.getElementById('agreeTerms');
-            var termsErr = document.getElementById('termsError');
-            if (!terms.checked) { valid = false; termsErr.textContent = 'You must agree to the terms'; termsErr.style.opacity = '1'; }
-            else { termsErr.textContent = ''; termsErr.style.opacity = '0'; }
-        }
-
+        if (!this.photoData) { App.toast('Photo is required', 'error'); valid = false; }
         return valid;
     },
 
-    // ===== SUBMIT =====
     handleSubmit: async function () {
-        if (!this.validate()) {
-            var fe = document.querySelector('#memberForm .form-group.has-error');
-            if (fe) fe.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            App.toast('Please fix the errors in the form', 'error');
-            return;
-        }
-
-        // Map all form fields to your new Supabase columns
         var data = {
             name: document.getElementById('memberName').value.trim(),
             phone: document.getElementById('mobileNumber').value.trim(),
@@ -277,54 +182,37 @@ App.Form = {
             photo: this.photoData,
             aadhaar: this.aadhaarData,
             payment_proof: this.paymentData,
-            status: 'pending'
+            status: this.editingId ? undefined : 'pending' // Preserve status on update
         };
 
-        // NEW: Supabase Insert
-        if (!this.supabaseClient) {
-            App.toast('Supabase not initialized! Check connection.', 'error');
-            return;
-        }
-
-        const { data: res, error } = await this.supabaseClient
-            .from('vasavi_members')
-            .insert([data]);
-
-        if (error) {
-            console.error(error);
-            App.toast('Error saving data ❌: ' + error.message, 'error');
+        if (this.editingId) {
+            var { error } = await App.DB.client.from('vasavi_members').update(data).eq('id', this.editingId);
+            if (error) App.toast('Error updating: ' + error.message, 'error');
+            else { App.toast('Updated successfully! ✅', 'success'); this._exit(); }
         } else {
-            App.toast('Saved successfully ✅', 'success');
-            this.resetForm();
-            this._showStep1();
-            if (window.App && window.App.refreshAll) window.App.refreshAll();
+            var { error } = await App.DB.client.from('vasavi_members').insert([data]);
+            if (error) App.toast('Error saving: ' + error.message, 'error');
+            else { App.toast('Registered successfully! ✅', 'success'); this._exit(); }
         }
     },
 
-    // ===== RESET =====
+    _exit: function() {
+        this.resetForm();
+        window.location.hash = 'dashboard';
+        App.navigate('dashboard');
+        App.refreshAll();
+    },
+
     resetForm: function () {
         document.getElementById('memberForm').reset();
         this.editingId = null; this.photoData = null; this.aadhaarData = null; this.paymentData = null;
-        document.getElementById('editMemberId').value = '';
-        var pp = document.getElementById('presentPost'); if (pp) pp.value = '';
-        var prevp = document.getElementById('previousPost'); if (prevp) prevp.value = '';
-        document.querySelectorAll('#memberForm .form-group').forEach(function (fg) { fg.classList.remove('has-error'); });
-        var pz = document.getElementById('photoZone'); if (pz) { pz.style.borderColor = ''; pz.style.boxShadow = ''; }
-        // Reset upload previews
-        ['photo', 'aadhaar', 'payment'].forEach(function (k) {
-            var ph = document.getElementById(k + 'Placeholder'); var pv = document.getElementById(k + 'Preview');
-            if (ph) ph.style.display = 'block'; if (pv) pv.style.display = 'none';
-        });
-        document.getElementById('paymentSection').style.display = 'block';
-        document.getElementById('disclaimerSection').style.display = 'block';
+        document.querySelectorAll('.upload-preview').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.upload-placeholder').forEach(p => p.style.display = 'block');
+        this._showStep1();
     },
 
-    // ===== EDIT from Members List =====
-    loadMember: function (id) {
-        var m = App.DB.getById(id); if (!m) return;
-        App.navigate('register');
-        var self = this;
-        setTimeout(function () { self._showForm('edit', m); }, 100);
+    loadMember: async function (id) {
+        var m = await App.DB.getById(id);
+        if (m) this._showForm('update', m);
     }
 };
-window.App = App;
