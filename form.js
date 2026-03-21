@@ -1,13 +1,10 @@
-/* ================================================================
-   FORM MODULE v2 — Registration Type, File Uploads, Payment
-   ================================================================ */
 const supabaseUrl = "https://kgdkogczvsmbbptiuzap.supabase.co"
 const supabaseKey = "sb_publishable_ClfcDfNddcRaO0NA5hkXlw_GFCOJkOC"
-let supabase = null;
+let supabaseClient = null;
 
 var App = window.App || {};
 App.Form = {
-    supabase: null,
+    supabaseClient: null,
     editingId: null,
     regType: 'new',
     photoData: null,
@@ -19,7 +16,7 @@ App.Form = {
         // Initialize Supabase safely
         try {
             if (window.supabase) {
-                this.supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                this.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
             }
         } catch (e) {
             console.error('Supabase init error:', e);
@@ -301,12 +298,12 @@ App.Form = {
         if (this.paymentData) data.paymentProof = this.paymentData;
 
         // NEW: Supabase Insert
-        if (!this.supabase) {
+        if (!this.supabaseClient) {
             App.toast('Supabase not initialized! Check connection.', 'error');
             return;
         }
 
-        const { data: res, error } = await this.supabase
+        const { data: res, error } = await this.supabaseClient
             .from('vasavi_members')
             .insert([data]);
 
