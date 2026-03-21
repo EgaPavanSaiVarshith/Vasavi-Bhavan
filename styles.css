@@ -498,3 +498,33 @@ tbody td{padding:12px 16px;color:var(--c-text-sec);white-space:nowrap} tbody td:
 @media(max-width:1024px){.metrics-row{grid-template-columns:repeat(2,1fr)} .dash-grid{grid-template-columns:1fr} .dash-card.wide{grid-column:1} .payment-layout{grid-template-columns:1fr} .type-cards{grid-template-columns:1fr}}
 @media(max-width:768px){.main-wrapper{margin-left:0} .sidebar{transform:translateX(-100%)} .sidebar.open{transform:translateX(0)} .sidebar-overlay.show{display:block} .menu-toggle{display:flex} .content-area{padding:20px 16px} .metrics-row{grid-template-columns:repeat(2,1fr);gap:12px} .metric-card{padding:16px 14px} .mc-value{font-size:1.4rem} .form-grid{grid-template-columns:1fr} .form-section{padding:20px} .form-actions{padding:16px 20px} .form-card-header{padding:20px} .members-toolbar{flex-direction:column;align-items:stretch} .search-box{max-width:100%} .toolbar-group{justify-content:flex-end} .user-name{display:none} .page-title{font-size:1rem} .topbar{padding:0 16px} .cal-grid{padding:10px} .cal-cell{min-height:40px;font-size:.8rem} .ac-body{grid-template-columns:1fr} .type-cards{grid-template-columns:1fr} .gallery-grid{grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));gap: 16px;}}
 @media(max-width:480px){.metrics-row{grid-template-columns:1fr} .metric-card{flex-direction:column;text-align:center} .toolbar-group{flex-direction:column} .toolbar-group .btn{width:100%;justify-content:center} .cal-title{font-size:1rem;min-width:auto} .search-member-input{flex-direction:column} .gallery-grid{grid-template-columns: 1fr;}}
+
+/* 🖨️ High-Visibility Action Buttons Fix */
+.act-btn {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    font-size: 1.3rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+}
+.act-btn:hover {
+    background: var(--c-primary) !important;
+    border-color: var(--c-primary-light) !important;
+    transform: translateY(-2px) scale(1.1) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+.act-btn.act-delete:hover {
+    background: var(--c-error) !important;
+}
+.td-actions {
+    display: flex !important;
+    gap: 12px !important;
+    justify-content: center !important;
+}
