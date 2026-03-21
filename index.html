@@ -410,16 +410,15 @@
                                     </select>
                                 </div>
                                 <div class="form-group full">
-                                    <label>Event Photo <span class="req">*</span></label>
-                                    <div class="upload-zone" id="galPhotoZone" style="max-width:400px; padding:20px;">
-                                        <input type="file" id="galPhotoFile" accept="image/*" hidden>
+                                    <label>Event Photos <span class="req">*</span></label>
+                                    <div class="upload-zone" id="galPhotoZone" style="max-width:100%; padding:20px;">
+                                        <input type="file" id="galPhotoFile" accept="image/*" multiple hidden>
                                         <div class="upload-placeholder" id="galPhotoPlaceholder">
-                                            <p>Click to upload event photo</p>
-                                            <span style="font-size:0.7rem">Max size 2MB</span>
+                                            <p>Click or drop photos here to upload (Multiple allowed)</p>
+                                            <span style="font-size:0.7rem">Max size 2MB per photo</span>
                                         </div>
-                                        <div class="upload-preview" id="galPhotoPreview" style="display:none;">
-                                            <img id="galPhotoImg" style="width:100%; max-height:250px; object-fit:contain; border-radius:8px;">
-                                            <button type="button" class="remove-upload" id="removeGalPhoto">✕ Remove</button>
+                                        <div class="photos-preview-grid" id="galPhotoPreviewGrid" style="display:none; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:12px; margin-top:16px;">
+                                            <!-- Previews will be injected here -->
                                         </div>
                                     </div>
                                 </div>
@@ -443,7 +442,20 @@
     <div class="modal-overlay" id="deleteModal"><div class="modal-box"><div class="modal-icon">⚠️</div><h3>Delete Member</h3><p>Are you sure? This action cannot be undone.</p><div class="modal-actions"><button class="btn btn-ghost" id="cancelDelete">Cancel</button><button class="btn btn-danger" id="confirmDelete">Delete</button></div></div></div>
 
     <!-- Image Viewer Modal -->
-    <div class="modal-overlay" id="imageModal"><div class="modal-box modal-img-box"><button class="modal-img-close" id="closeImageModal">✕</button><img id="modalImage" alt="Document Preview"></div></div>
+    <div class="modal-overlay" id="imageModal">
+        <div class="modal-box modal-img-box">
+            <button class="modal-img-close" id="closeImageModal">✕</button>
+            <div class="modal-img-container">
+                <img id="modalImage" alt="Document Preview">
+                <button class="modal-nav modal-prev" id="prevImg">‹</button>
+                <button class="modal-nav modal-next" id="nextImg">›</button>
+            </div>
+            <div class="modal-img-info">
+                <span id="modalImgCounter"></span>
+                <p id="modalImgTitle"></p>
+            </div>
+        </div>
+    </div>
 
     <!-- Notification Panel -->
     <div class="notif-overlay" id="notifOverlay"></div>
