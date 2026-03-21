@@ -28,7 +28,10 @@ App.DB = {
             gothram: m.gothram || ''
         }, m));
     },
-    getById: function (id) { return this.getAll().find(function (m) { return m.id === id; }) || null; },
+    getById: async function (id) { 
+        const items = await this.getAll();
+        return items.find(function (m) { return m.id === id; }) || null; 
+    },
 
     create: function (member) {
         var members = this.getAll();
@@ -136,8 +139,14 @@ App.DB = {
     _isToday: function (ds) { if (!ds) return false; var d = new Date(ds), n = new Date(); return d.getDate() === n.getDate() && d.getMonth() === n.getMonth(); },
     _daysUntilNext: function (ds) { if (!ds) return 999; var t = new Date(); t.setHours(0, 0, 0, 0); var d = new Date(ds), nx = new Date(t.getFullYear(), d.getMonth(), d.getDate()); if (nx < t) nx.setFullYear(t.getFullYear() + 1); return Math.round((nx - t) / 864e5); },
 
-    getTodayBirthdays: function () { var s = this; return this.getApproved().filter(function (m) { return s._isToday(m.dob); }); },
-    getTodayAnniversaries: function () { var s = this; return this.getApproved().filter(function (m) { return s._isToday(m.marriageDay); }); },
+    getTodayBirthdays: async function () { 
+        const approved = await this.getApproved();
+        return approved.filter(m => this._isToday(m.dob)); 
+    },
+    getTodayAnniversaries: async function () { 
+        const approved = await this.getApproved();
+        return approved.filter(m => this._isToday(m.marriageDay)); 
+    },
 
     getUpcomingEvents: async function (days) {
         days = days || 7; var s = this, ev = [];

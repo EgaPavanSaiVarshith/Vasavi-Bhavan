@@ -131,9 +131,9 @@ App.Committee = {
         if (c) this._showForm(c);
     },
 
-    render: function() {
+    render: async function() {
         var c = document.getElementById('committeeContainer');
-        var members = App.DB.getCommittee();
+        var members = await App.DB.getCommittee();
         
         if (!members.length) {
             c.innerHTML = '<div class="empty-state" style="padding:60px; text-align:center"><div style="font-size:3rem;margin-bottom:16px">🏛️</div><p>No committee members defined yet.</p><p style="font-size:0.85rem;margin-top:8px">Click "Add Member" above to set up the board.</p></div>';

@@ -12,18 +12,18 @@ App.Calendar = {
         document.getElementById('calTodayBtn').addEventListener('click', function () { var n = new Date(); self.year = n.getFullYear(); self.month = n.getMonth(); self.selected = null; self.render(); });
     },
 
-    render: function () {
+    render: async function () {
         var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         document.getElementById('calTitle').textContent = months[this.month] + ' ' + this.year;
-        this._grid();
+        await this._grid();
     },
 
-    _grid: function () {
+    _grid: async function () {
         var g = document.getElementById('calGrid'), today = new Date(), y = this.year, mo = this.month;
         var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         var html = days.map(function (d) { return '<div class="cal-day-name">' + d + '</div>'; }).join('');
         var first = new Date(y, mo, 1).getDay(), dim = new Date(y, mo + 1, 0).getDate(), prevDim = new Date(y, mo, 0).getDate();
-        var eMap = this._eventMap(mo);
+        var eMap = await this._eventMap(mo);
 
         for (var i = first - 1; i >= 0; i--) html += '<div class="cal-cell other-month"><span>' + (prevDim - i) + '</span></div>';
 
@@ -51,8 +51,8 @@ App.Calendar = {
         if (this.selected && this.selected.month === mo) this._showEvents(this.selected.day, mo);
     },
 
-    _eventMap: function (mo) {
-        var m = {}, members = App.DB.getApproved();
+    _eventMap: async function (mo) {
+        var m = {}, members = await App.DB.getApproved();
         members.forEach(function (mb) {
             if (mb.dob) { var d = new Date(mb.dob); if (d.getMonth() === mo) { var k = d.getDate(); if (!m[k]) m[k] = []; m[k].push({ type: 'birthday', member: mb }); } }
             if (mb.marriageDay) { var d2 = new Date(mb.marriageDay); if (d2.getMonth() === mo) { var k2 = d2.getDate(); if (!m[k2]) m[k2] = []; m[k2].push({ type: 'anniversary', member: mb }); } }
@@ -60,16 +60,16 @@ App.Calendar = {
         return m;
     },
 
-    _showEvents: function (day, mo) {
+    _showEvents: async function (day, mo) {
         var panel = document.getElementById('calEvents'), title = document.getElementById('calEventsTitle'), list = document.getElementById('calEventsList');
         var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         title.textContent = 'Events on ' + day + ' ' + months[mo];
-        var events = App.DB.getEventsForDate(mo, day);
+        var events = await App.DB.getEventsForDate(mo, day);
         if (!events.length) { list.innerHTML = '<p class="empty-state">No events on this day</p>'; }
         else {
             list.innerHTML = events.map(function (ev) {
                 var icon = ev.type === 'birthday' ? '🎂' : '💍', label = ev.type === 'birthday' ? 'Birthday' : 'Marriage Anniversary';
-                return '<div class="event-item"><div class="event-icon">' + icon + '</div><div class="event-info"><div class="event-name">' + App.Utils.escapeHtml(ev.member.memberName) + '</div><div class="event-detail">' + label + ' • 📱 ' + App.Utils.escapeHtml(ev.member.mobileNumber) + '</div></div></div>';
+                return '<div class="event-item"><div class="event-icon">' + icon + '</div><div class="event-info"><div class="event-name">' + App.Utils.escapeHtml(ev.member.name || ev.member.memberName) + '</div><div class="event-detail">' + label + ' • 📱 ' + App.Utils.escapeHtml(ev.member.phone || ev.member.mobileNumber) + '</div></div></div>';
             }).join('');
         }
         panel.classList.add('show');

@@ -63,10 +63,10 @@ App._setupNotifs = function () {
     document.getElementById('notifClose').addEventListener('click', function () { p.classList.remove('show'); ov.classList.remove('show'); });
     ov.addEventListener('click', function () { p.classList.remove('show'); ov.classList.remove('show'); });
 };
-App._renderNotifPanel = function () {
+App._renderNotifPanel = async function () {
     var body = document.getElementById('notifBody');
-    var pending = App.DB.getPending();
-    var events = App.DB.getUpcomingEvents(30);
+    var pending = await App.DB.getPending();
+    var events = await App.DB.getUpcomingEvents(30);
     var items = '';
 
     if (pending.length) {
@@ -89,8 +89,8 @@ App._renderNotifPanel = function () {
 };
 
 // ===== ALERTS =====
-App._checkAlerts = function () {
-    var bd = App.DB.getTodayBirthdays(), an = App.DB.getTodayAnniversaries(), up = App.DB.getUpcomingEvents(7), pe = App.DB.getPending();
+App._checkAlerts = async function () {
+    var bd = await App.DB.getTodayBirthdays(), an = await App.DB.getTodayAnniversaries(), up = await App.DB.getUpcomingEvents(7), pe = await App.DB.getPending();
     var total = up.length + pe.length;
     var badge = document.getElementById('notifBadge');
     badge.style.display = total > 0 ? 'flex' : 'none'; badge.textContent = total;
