@@ -101,7 +101,7 @@ App.Members = {
             + '<div class="top-right">' + photoHtml + '</div>'
             + '</div>'
             + '<div class="section-title">👤 Personal Details</div>'
-            + '<table><tr><th>Application No</th><td>' + m.id.substring(0, 10) + '</td><th>Date of Birth</th><td>' + fd(m.dob) + '</td></tr>'
+            + '<table><tr><th>Application No</th><td>' + (m.id + "").substring(0, 10) + '</td><th>Date of Birth</th><td>' + fd(m.dob) + '</td></tr>'
             + '<tr><th>Member Name</th><td colspan="3">' + esc(m.memberName) + '</td></tr>'
             + '<tr><th>Father\'s Name</th><td colspan="3">' + esc(m.fatherName) + '</td></tr>'
             + '<tr><th>Gothram</th><td>' + esc(m.gothram) + '</td><th>Blood Group</th><td>' + esc(m.bloodGroup) + '</td></tr>'
