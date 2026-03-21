@@ -18,8 +18,8 @@ App.Members = {
         });
     },
 
-    render: function () {
-        var members = App.DB.search(this.query, this.statusFilter);
+    render: async function () {
+        var members = await App.DB.search(this.query, this.statusFilter);
         var f = this.sortField, d = this.sortDir;
         members.sort(function (a, b) { var va = (a[f] || '').toString().toLowerCase(), vb = (b[f] || '').toString().toLowerCase(); return va < vb ? (d === 'asc' ? -1 : 1) : va > vb ? (d === 'asc' ? 1 : -1) : 0; });
         var tp = Math.ceil(members.length / this.perPage) || 1; if (this.page > tp) this.page = tp;

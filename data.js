@@ -1,14 +1,33 @@
-/* ================================================================
-   DATA LAYER v2 — With Status, File Uploads, Approval Workflow
-   ================================================================ */
+const supabaseUrl = "https://kgdkogczvsmbbptiuzap.supabase.co"
+const supabaseKey = "sb_publishable_ClfcDfNddcRaO0NA5hkXlw_GFCOJkOC"
+let supabaseClient = null;
+
 var App = window.App || {};
 App.DB = {
     key: 'vasavi_members',
     comKey: 'vasavi_committee',
     galKey: 'vasavi_gallery',
 
-    // ===== MAIN MEMBERS DATABASE =====
-    getAll: function () { try { return JSON.parse(localStorage.getItem(this.key) || '[]'); } catch (e) { return []; } },
+    init: function() {
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+            this.client = supabaseClient;
+        }
+    },
+
+    // ===== MAIN MEMBERS DATABASE (Now Async) =====
+    getAll: async function () { 
+        if (!supabaseClient) this.init();
+        const { data, error } = await supabaseClient.from(this.key).select('*');
+        if (error) { console.error(error); return []; }
+        // Map common fields to match the rest of the app's expectations
+        return (data || []).map(m => Object.assign({ 
+            memberName: m.name || 'Unknown', 
+            mobileNumber: m.phone || '0000000000',
+            dob: m.dob || '',
+            gothram: m.gothram || ''
+        }, m));
+    },
     getById: function (id) { return this.getAll().find(function (m) { return m.id === id; }) || null; },
 
     create: function (member) {
@@ -87,26 +106,32 @@ App.DB = {
     reject: function (id) { return this.update(id, { status: 'rejected' }); },
 
     // ===== QUERIES =====
-    search: function (query, statusFilter) {
+    search: async function (query, statusFilter) {
         query = (query || '').toLowerCase().trim();
-        var members = this.getAll();
+        var members = await this.getAll();
         if (statusFilter && statusFilter !== 'all') members = members.filter(function (m) { return m.status === statusFilter; });
         if (!query) return members;
         return members.filter(function (m) {
-            return (m.memberName || '').toLowerCase().includes(query) ||
+            return (m.name || m.memberName || '').toLowerCase().includes(query) ||
                 (m.fatherName || '').toLowerCase().includes(query) ||
                 (m.spouseName || '').toLowerCase().includes(query) ||
                 (m.gothram || '').toLowerCase().includes(query) ||
-                (m.mobileNumber || '').includes(query) ||
+                (m.phone || m.mobileNumber || '').includes(query) ||
                 (m.bloodGroup || '').toLowerCase().includes(query);
         });
     },
 
-    findByMobile: function (mobile) { return this.getAll().find(function (m) { return m.mobileNumber === mobile; }) || null; },
+    findByMobile: async function (mobile) { 
+        const items = await this.getAll();
+        return items.find(function (m) { return m.phone === mobile || m.mobileNumber === mobile; }) || null; 
+    },
 
-    getByStatus: function (status) { return this.getAll().filter(function (m) { return m.status === status; }); },
-    getApproved: function () { return this.getByStatus('approved'); },
-    getPending: function () { return this.getByStatus('pending'); },
+    getByStatus: async function (status) { 
+        const items = await this.getAll();
+        return items.filter(function (m) { return m.status === status; }); 
+    },
+    getApproved: async function () { return this.getByStatus('approved'); },
+    getPending: async function () { return this.getByStatus('pending'); },
 
     _isToday: function (ds) { if (!ds) return false; var d = new Date(ds), n = new Date(); return d.getDate() === n.getDate() && d.getMonth() === n.getMonth(); },
     _daysUntilNext: function (ds) { if (!ds) return 999; var t = new Date(); t.setHours(0, 0, 0, 0); var d = new Date(ds), nx = new Date(t.getFullYear(), d.getMonth(), d.getDate()); if (nx < t) nx.setFullYear(t.getFullYear() + 1); return Math.round((nx - t) / 864e5); },
@@ -114,26 +139,31 @@ App.DB = {
     getTodayBirthdays: function () { var s = this; return this.getApproved().filter(function (m) { return s._isToday(m.dob); }); },
     getTodayAnniversaries: function () { var s = this; return this.getApproved().filter(function (m) { return s._isToday(m.marriageDay); }); },
 
-    getUpcomingEvents: function (days) {
+    getUpcomingEvents: async function (days) {
         days = days || 7; var s = this, ev = [];
-        this.getApproved().forEach(function (m) {
+        const approved = await this.getApproved();
+        approved.forEach(function (m) {
             var bd = s._daysUntilNext(m.dob); if (bd <= days) ev.push({ type: 'birthday', member: m, daysUntil: bd });
             if (m.marriageDay) { var ad = s._daysUntilNext(m.marriageDay); if (ad <= days) ev.push({ type: 'anniversary', member: m, daysUntil: ad }); }
         });
         return ev.sort(function (a, b) { return a.daysUntil - b.daysUntil; });
     },
 
-    getEventsForDate: function (month, day) {
+    getEventsForDate: async function (month, day) {
         var ev = [];
-        this.getApproved().forEach(function (m) {
+        const approved = await this.getApproved();
+        approved.forEach(function (m) {
             if (m.dob) { var d = new Date(m.dob); if (d.getMonth() === month && d.getDate() === day) ev.push({ type: 'birthday', member: m }); }
             if (m.marriageDay) { var d2 = new Date(m.marriageDay); if (d2.getMonth() === month && d2.getDate() === day) ev.push({ type: 'anniversary', member: m }); }
         });
         return ev;
     },
 
-    getRecent: function (n) { return this.getAll().sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); }).slice(0, n || 5); },
-    _save: function (m) { localStorage.setItem(this.key, JSON.stringify(m)); }
+    getRecent: async function (n) { 
+        const items = await this.getAll();
+        return items.sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); }).slice(0, n || 5); 
+    },
+    _save: function (m) { }
 };
 
 App.Utils = {

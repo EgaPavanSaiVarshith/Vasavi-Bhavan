@@ -108,24 +108,19 @@ App._checkAlerts = function () {
 };
 
 // ===== PENDING APPROVALS =====
-App._renderPending = function () {
-    var c = document.getElementById('pendingList'), pending = App.DB.getPending();
+App._renderPending = async function () {
+    var c = document.getElementById('pendingList'), pending = await App.DB.getPending();
     if (!pending.length) { c.innerHTML = '<p class="empty-state">No pending applications 🎉</p>'; return; }
     c.innerHTML = pending.map(function (m) {
         var esc = App.Utils.escapeHtml, fd = App.Utils.formatDate;
-        var aadhaarBtn = m.aadhaarFile ? '<button class="view-doc-btn" onclick="App.viewImage(\'' + m.id + '\',\'aadhaar\')">📄 View Aadhaar</button>' : '';
+        var aadhaarBtn = m.aadhaar || m.aadhaarFile ? '<button class="view-doc-btn" onclick="App.viewImage(\'' + m.id + '\',\'aadhaar\')">📄 View Aadhaar</button>' : '';
         var paymentBtn = m.paymentProof ? '<button class="view-doc-btn" onclick="App.viewImage(\'' + m.id + '\',\'payment\')">🧾 View Payment</button>' : '';
         return '<div class="approval-card">'
-            + '<div class="ac-header"><h3>' + esc(m.memberName) + '</h3><span class="status-badge status-pending">Pending</span></div>'
+            + '<div class="ac-header"><h3>' + esc(m.name || m.memberName) + '</h3><span class="status-badge status-' + (m.status || 'pending') + '">' + (m.status || 'pending') + '</span></div>'
             + '<div class="ac-body">'
             + '<div class="ac-detail"><strong>DOB:</strong> ' + fd(m.dob) + '</div>'
-            + '<div class="ac-detail"><strong>Father:</strong> ' + esc(m.fatherName) + '</div>'
-            + '<div class="ac-detail"><strong>Spouse:</strong> ' + esc(m.spouseName || '—') + '</div>'
-            + '<div class="ac-detail"><strong>Gothram:</strong> ' + esc(m.gothram) + '</div>'
-            + '<div class="ac-detail"><strong>Blood:</strong> ' + esc(m.bloodGroup) + '</div>'
-            + '<div class="ac-detail"><strong>Mobile:</strong> ' + esc(m.mobileNumber) + '</div>'
-            + '<div class="ac-detail"><strong>Marriage:</strong> ' + fd(m.marriageDay) + '</div>'
-            + '<div class="ac-detail"><strong>Address:</strong> ' + esc(m.address) + '</div>'
+            + '<div class="ac-detail"><strong>Father:</strong> ' + esc(m.fatherName || '—') + '</div>'
+            + '<div class="ac-detail"><strong>Mobile:</strong> ' + esc(m.phone || m.mobileNumber) + '</div>'
             + '<div class="ac-uploads">' + aadhaarBtn + paymentBtn + '</div>'
             + '</div>'
             + '<div class="ac-actions"><button class="btn btn-success btn-sm" onclick="App.approveMember(\'' + m.id + '\')">✅ Approve</button><button class="btn btn-danger btn-sm" onclick="App.rejectMember(\'' + m.id + '\')">❌ Reject</button></div>'
@@ -133,17 +128,17 @@ App._renderPending = function () {
     }).join('');
 };
 
-App.approveMember = function (id) { App.DB.approve(id); App.toast('Member approved! ✅', 'success'); App.refreshAll(); this._renderPending(); };
-App.rejectMember = function (id) { App.DB.reject(id); App.toast('Application rejected', 'warning'); App.refreshAll(); this._renderPending(); };
+App.approveMember = async function (id) { await App.DB.approve(id); App.toast('Approved! ✅', 'success'); await App.refreshAll(); await this._renderPending(); };
+App.rejectMember = async function (id) { await App.DB.reject(id); App.toast('Rejected', 'warning'); await App.refreshAll(); await this._renderPending(); };
 
 // ===== IMAGE VIEWER MODAL =====
 App._setupImageModal = function () {
     document.getElementById('closeImageModal').addEventListener('click', function () { document.getElementById('imageModal').classList.remove('show'); });
     document.getElementById('imageModal').addEventListener('click', function (e) { if (e.target === this) this.classList.remove('show'); });
 };
-App.viewImage = function (id, type) {
-    var m = App.DB.getById(id); if (!m) return;
-    var src = type === 'aadhaar' ? m.aadhaarFile : m.paymentProof;
+App.viewImage = async function (id, type) {
+    var m = await App.DB.getById(id); if (!m) return;
+    var src = type === 'aadhaar' ? (m.aadhaar || m.aadhaarFile) : m.paymentProof;
     if (!src) { this.toast('No document uploaded', 'warning'); return; }
     document.getElementById('modalImage').src = src;
     document.getElementById('imageModal').classList.add('show');
@@ -155,7 +150,13 @@ App._setupLogout = function () {
 };
 
 // ===== REFRESH ALL =====
-App.refreshAll = function () { this.Dashboard.render(); this.Committee.render(); this.Members.render(); this.Calendar.render(); this._checkAlerts(); };
+App.refreshAll = async function () { 
+    await this.Dashboard.render(); 
+    await this.Committee.render(); 
+    await this.Members.render(); 
+    await this.Calendar.render(); 
+    await this._checkAlerts(); 
+};
 
 // ===== TOAST =====
 App.toast = function (msg, type) {
