@@ -28,7 +28,17 @@ App.DB = {
         this._membersCache = (data || []).map(m => Object.assign({ 
             memberName: m.name || 'Unknown', 
             mobileNumber: m.phone || '0', 
-            dob: m.dob || '' 
+            dob: m.dob || '',
+            fatherName: m.father_name || '',
+            spouseName: m.spouse_name || '',
+            gothram: m.gothram || '',
+            bloodGroup: m.blood_group || '',
+            marriageDay: m.marriage_day || '',
+            address: m.address || '',
+            photoData: m.photo || '',
+            aadhaarFile: m.aadhaar || '',
+            paymentProof: m.payment_proof || '',
+            createdAt: m.createdAt || m.created_at || new Date().toISOString()
         }, m));
         return this._membersCache;
     },

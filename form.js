@@ -263,12 +263,22 @@ App.Form = {
             return;
         }
 
-        // Map the form data to your Supabase column names
+        // Map all form fields to your new Supabase columns
         var data = {
             name: document.getElementById('memberName').value.trim(),
             phone: document.getElementById('mobileNumber').value.trim(),
-            aadhaar: this.aadhaarData, // Your column is named 'aadhaar'
-            status: 'pending'
+            dob: document.getElementById('dob').value,
+            father_name: document.getElementById('fatherName').value.trim(),
+            spouse_name: document.getElementById('spouseName').value.trim(),
+            gothram: document.getElementById('gothram').value.trim(),
+            blood_group: document.getElementById('bloodGroup').value,
+            marriage_day: document.getElementById('marriageDay').value || null,
+            address: document.getElementById('address').value.trim(),
+            photo: this.photoData,
+            aadhaar: this.aadhaarData,
+            payment_proof: this.paymentData,
+            status: 'pending',
+            createdAt: new Date().toISOString()
         };
 
         // NEW: Supabase Insert
