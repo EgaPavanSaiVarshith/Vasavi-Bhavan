@@ -57,12 +57,16 @@ App.Members = {
     _hideDelete: function () { document.getElementById('deleteModal').classList.remove('show'); this.deleteId = null; },
 
     // ===== PRINT INDIVIDUAL FORM =====
-    printForm: function (id) {
-        var m = App.DB.getById(id); if (!m) return;
+    printForm: async function (id) {
+        var m = await App.DB.getById(id); if (!m) return;
         var esc = App.Utils.escapeHtml, fd = App.Utils.formatDateLong;
-        var photoHtml = m.photoFile ? '<img src="' + m.photoFile + '" style="width:110px;height:140px;object-fit:cover;border:1px solid #ccc;display:block">' : '<div style="width:110px;height:140px;border:1px dashed #999;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;text-align:center">Affix Photo<br>Here</div>';
-        var aadhaarHtml = m.aadhaarFile ? '<img src="' + m.aadhaarFile + '" style="max-width:100%;max-height:160px;border:1px solid #ccc;border-radius:4px">' : '<span style="color:#999;font-size:12px">Not uploaded</span>';
-        var paymentHtml = m.paymentProof ? '<img src="' + m.paymentProof + '" style="max-width:100%;max-height:160px;border:1px solid #ccc;border-radius:4px">' : '<span style="color:#999;font-size:12px">Not uploaded</span>';
+        var photoUrl = m.photo || m.photoFile;
+        var aadhaarUrl = m.aadhaar || m.aadhaarFile;
+        var paymentUrl = m.payment_proof || m.paymentProof;
+
+        var photoHtml = photoUrl ? '<img src="' + photoUrl + '" style="width:110px;height:140px;object-fit:cover;border:1px solid #ccc;display:block">' : '<div style="width:110px;height:140px;border:1px dashed #999;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;text-align:center">Affix Photo<br>Here</div>';
+        var aadhaarHtml = aadhaarUrl ? '<img src="' + aadhaarUrl + '" style="max-width:100%;max-height:160px;border:1px solid #ccc;border-radius:4px">' : '<span style="color:#999;font-size:12px">Not uploaded</span>';
+        var paymentHtml = paymentUrl ? '<img src="' + paymentUrl + '" style="max-width:100%;max-height:160px;border:1px solid #ccc;border-radius:4px">' : '<span style="color:#999;font-size:12px">Not uploaded</span>';
         var statusColor = m.status === 'approved' ? '#2e7d32' : m.status === 'rejected' ? '#c62828' : '#e65100';
 
         var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Membership Form - ' + esc(m.memberName) + '</title><style>'
@@ -119,8 +123,8 @@ App.Members = {
     },
 
     // ===== EXPORT CSV =====
-    exportCSV: function () {
-        var members = App.DB.getAll();
+    exportCSV: async function () {
+        var members = await App.DB.getAll();
         if (!members.length) { App.toast('No data to export', 'warning'); return; }
         var headers = ['Name', 'DOB', 'Father', 'Spouse', 'Gothram', 'Marriage Date', 'Blood Group', 'Address', 'Mobile', 'Status'];
         var rows = members.map(function (m) {
@@ -132,8 +136,8 @@ App.Members = {
     },
 
     // ===== EXPORT EXCEL =====
-    exportExcel: function () {
-        var members = App.DB.getAll();
+    exportExcel: async function () {
+        var members = await App.DB.getAll();
         if (!members.length) { App.toast('No data to export', 'warning'); return; }
         var html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"><style>th{background:#880E4F;color:white;padding:8px;font-size:12px} td{padding:6px 8px;border-bottom:1px solid #ddd;font-size:11px} table{border-collapse:collapse}</style></head><body><table><thead><tr><th>Name</th><th>DOB</th><th>Father</th><th>Spouse</th><th>Gothram</th><th>Marriage Date</th><th>Blood Group</th><th>Address</th><th>Mobile</th><th>Status</th></tr></thead><tbody>';
         html += members.map(function (m) {
