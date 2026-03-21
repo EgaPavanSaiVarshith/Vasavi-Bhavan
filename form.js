@@ -274,28 +274,13 @@ App.Form = {
             return;
         }
 
+        // Map the form data to your Supabase column names
         var data = {
-            memberName: document.getElementById('memberName').value.trim(),
-            dob: document.getElementById('dob').value,
-            fatherName: document.getElementById('fatherName').value.trim(),
-            spouseName: document.getElementById('spouseName').value.trim(),
-            gothram: document.getElementById('gothram').value.trim(),
-            bloodGroup: document.getElementById('bloodGroup').value,
-            marriageDay: document.getElementById('marriageDay').value,
-            address: document.getElementById('address').value.trim(),
-            mobileNumber: document.getElementById('mobileNumber').value.trim(),
-            status: 'pending',
-            createdAt: new Date().toISOString()
+            name: document.getElementById('memberName').value.trim(),
+            phone: document.getElementById('mobileNumber').value.trim(),
+            aadhaar: this.aadhaarData, // Your column is named 'aadhaar'
+            status: 'pending'
         };
-
-        if (this.regType === 'update' || this.regType === 'edit') {
-            var pp = document.getElementById('presentPost'); if (pp) data.presentPost = pp.value.trim();
-            var prevp = document.getElementById('previousPost'); if (prevp) data.previousPost = prevp.value.trim();
-        }
-
-        if (this.photoData) data.photoFile = this.photoData;
-        if (this.aadhaarData) data.aadhaarFile = this.aadhaarData;
-        if (this.paymentData) data.paymentProof = this.paymentData;
 
         // NEW: Supabase Insert
         if (!this.supabaseClient) {
