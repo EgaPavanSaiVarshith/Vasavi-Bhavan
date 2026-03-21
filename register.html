@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Registration | SVKP Kalyana Mandapam</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { background: var(--c-bg); color: var(--c-text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .reg-container { width: 100%; max-width: 900px; background: var(--c-surface); border-radius: 16px; border: 1px solid var(--c-border); overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .reg-header { padding: 40px; text-align: center; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1)); border-bottom: 1px solid var(--c-border); }
+        .reg-title { font-size: 1.5rem; font-weight: 700; color: var(--c-primary); margin-bottom: 8px; }
+        .reg-subtitle { font-size: 0.85rem; color: var(--c-text-sec); }
+        #view-register { display: block !important; padding: 40px; }
+        .back-to-login { display: block; text-align: center; padding: 20px; color: var(--c-text-sec); font-size: 0.85rem; text-decoration: none; border-top: 1px solid var(--c-border); }
+        .back-to-login:hover { color: var(--c-primary); }
+        .form-card { background: transparent; padding: 0; box-shadow: none; border: none; }
+    </style>
+</head>
+<body>
+    <div class="reg-container">
+        <div class="reg-header">
+            <div class="reg-title">MEMBER REGISTRATION</div>
+            <div class="reg-subtitle">SRI VASAVI KANYAKA PARAMESHWERI KALYANA MANDAPAM COMMITTEE</div>
+        </div>
+
+        <div id="view-register" class="view active">
+            <div class="form-card">
+                <div class="form-steps-header">
+                    <div class="step-indicator active" id="step1-ind"><span>1</span><p>Details</p></div>
+                    <div class="step-line"></div>
+                    <div class="step-indicator" id="step2-ind"><span>2</span><p>Uploads</p></div>
+                    <div class="step-line"></div>
+                    <div class="step-indicator" id="step3-ind"><span>3</span><p>Payment</p></div>
+                </div>
+
+                <form id="memberForm" novalidate>
+                    <input type="hidden" id="editMemberId">
+                    
+                    <!-- Step 1: Personal -->
+                    <div class="form-step active" id="step-1">
+                        <div class="form-section">
+                            <h3 class="fs-title"><span>👤</span> Personal Details</h3>
+                            <div class="form-grid">
+                                <div class="form-group" id="fg-memberName"><label for="memberName">Member Name <span class="req">*</span></label><input type="text" id="memberName" placeholder="Enter full name" required><span class="fg-error"></span></div>
+                                <div class="form-group" id="fg-dob"><label for="dob">Date of Birth <span class="req">*</span></label><input type="date" id="dob" required><span class="fg-error"></span></div>
+                                <div class="form-group" id="fg-fatherName"><label for="fatherName">Father's Name <span class="req">*</span></label><input type="text" id="fatherName" placeholder="Enter father's name" required><span class="fg-error"></span></div>
+                                <div class="form-group" id="fg-spouseName"><label for="spouseName">Spouse Name</label><input type="text" id="spouseName" placeholder="Enter spouse's name"></div>
+                                <div class="form-group" id="fg-gothram"><label for="gothram">Gothram <span class="req">*</span></label><input type="text" id="gothram" placeholder="Enter gothram" required><span class="fg-error"></span></div>
+                                <div class="form-group" id="fg-bloodGroup"><label for="bloodGroup">Blood Group <span class="req">*</span></label><select id="bloodGroup" required><option value="">Select Blood Group</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="AB+">AB+</option><option value="AB-">AB-</option><option value="O+">O+</option><option value="O-">O-</option></select><span class="fg-error"></span></div>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <h3 class="fs-title"><span>💍</span> Marriage Details</h3>
+                            <div class="form-grid"><div class="form-group" id="fg-marriageDay"><label for="marriageDay">Marriage Date</label><input type="date" id="marriageDay"></div></div>
+                        </div>
+                        <div class="form-section">
+                            <h3 class="fs-title"><span>📞</span> Contact Info</h3>
+                            <div class="form-grid">
+                                <div class="form-group full" id="fg-address"><label for="address">Address <span class="req">*</span></label><textarea id="address" rows="3" required></textarea><span class="fg-error"></span></div>
+                                <div class="form-group" id="fg-mobileNumber"><label for="mobileNumber">Mobile Number <span class="req">*</span></label><input type="tel" id="mobileNumber" maxlength="10" required><span class="fg-error"></span></div>
+                            </div>
+                        </div>
+                        <div class="step-actions"><button type="button" class="btn btn-primary" onclick="App.Form._showStep2()">Next Step ➔</button></div>
+                    </div>
+
+                    <!-- Step 2: Uploads -->
+                    <div class="form-step" id="step-2">
+                        <div class="form-section">
+                            <h3 class="fs-title"><span>🆔</span> Required Documents</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Aadhaar Card <span class="req">*</span></label>
+                                    <div class="upload-zone" id="aadhaarZone">
+                                        <input type="file" id="aadhaarFile" hidden>
+                                        <div class="upload-placeholder" id="aadhaarPlaceholder">📁 Click to Upload Aadhaar</div>
+                                        <div class="upload-preview" id="aadhaarPreview" style="display:none"><img id="aadhaarImg" style="width:100%; max-height:150px; object-fit:contain"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Profile Photo <span class="req">*</span></label>
+                                    <div class="upload-zone" id="photoZone">
+                                        <input type="file" id="photoFile" hidden>
+                                        <div class="upload-placeholder" id="photoPlaceholder">👤 Click to Upload Photo</div>
+                                        <div class="upload-preview" id="photoPreview" style="display:none"><img id="photoImg" style="width:100%; max-height:150px; object-fit:contain"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step-actions"><button type="button" class="btn btn-secondary" onclick="App.Form._showStep1()">⬅ Back</button><button type="button" class="btn btn-primary" onclick="App.Form._showStep3()">Next Step ➔</button></div>
+                    </div>
+
+                    <!-- Step 3: Payment -->
+                    <div class="form-step" id="step-3">
+                        <div class="form-section">
+                            <h3 class="fs-title"><span>💳</span> Membership Payment</h3>
+                            <div class="qr-box" style="text-align:center; padding:20px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:20px;">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi%3A%2F%2Fpay%3Fpa%3Dsvkpmandapam%40sbi%26pn%3DSVKP%2520Mandapam%26am%3D1000" alt="QR" style="margin-bottom:10px; border-radius:8px;">
+                                <p style="font-weight:600; color:var(--c-primary)">Pay ₹ 1,000/- via any UPI App</p>
+                                <p style="font-size:0.75rem; opacity:0.7">After payment, upload the screenshot below</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Upload Payment Receipt <span class="req">*</span></label>
+                                <div class="upload-zone" id="paymentZone">
+                                    <input type="file" id="paymentFile" hidden>
+                                    <div class="upload-placeholder" id="paymentPlaceholder">🧾 Click to Upload Receipt</div>
+                                    <div class="upload-preview" id="paymentPreview" style="display:none"><img id="paymentImg" style="width:100%; max-height:150px; object-fit:contain"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step-actions"><button type="button" class="btn btn-secondary" onclick="App.Form._showStep2()">⬅ Back</button><button type="submit" class="btn btn-success" id="finalSubmitBtn">Submit Application ✅</button></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <a href="login.html" class="back-to-login">Already a Committee Member? Login here</a>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="data.js"></script>
+    <script src="form.js"></script>
+    <script>
+        // Mock UI for Form.js standalone mode
+        window.App = window.App || {};
+        App.toast = function(msg, type) { 
+            alert(msg); 
+        };
+        App.DB.init();
+        App.Form.init();
+        
+        // Custom override for toast or refresh
+        App.refreshAll = function() {
+             // In public mode, we just redirect or show success
+             document.getElementById('view-register').innerHTML = '<div style="text-align:center; padding:60px 20px;"><div style="font-size:4rem; margin-bottom:20px;">🙏</div><h2 style="color:var(--c-primary); margin-bottom:10px;">Application Submitted!</h2><p style="opacity:0.8">Thank you for your interest. Your application is now with the Committee for approval.</p><a href="register.html" class="btn btn-secondary" style="margin-top:30px; display:inline-block;">Register Another Member</a></div>';
+        };
+    </script>
+</body>
+</html>

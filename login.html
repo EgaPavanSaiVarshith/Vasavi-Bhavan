@@ -103,15 +103,24 @@
                 <p>Default Credentials</p>
                 <div class="hint-row"><span>Username:</span><code>admin</code></div>
                 <div class="hint-row"><span>Password:</span><code>vasavi123</code></div>
-            </div>
-
-            <div class="login-footer">
+            </div            <div class="login-footer">
                 <p>🙏 Sri Vasavi Kanyakaparameshwari Kalyana Mandapam</p>
+                <div style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
+                    <p style="font-size:0.85rem; opacity:0.8; margin-bottom:10px;">Not a Committee Member?</p>
+                    <a href="register.html" class="login-btn" style="background:transparent; border:1px solid var(--c-primary); color:var(--c-primary); display:inline-block; margin:5px; padding:8px 20px; text-decoration:none; font-size:0.8rem; height:auto; width:auto; line-height:1.5;">Register as Member</a>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="data.js"></script>
     <script>
+        // Initialize Supabase from data.js
+        App.DB.init();
+        var supabase = App.DB.client;
+
         // ===== Auth check =====
         if (sessionStorage.getItem('vasavi_auth') === 'true') {
             window.location.href = 'index.html';
@@ -141,9 +150,6 @@
         var errorText = document.getElementById('errorText');
         var eyeBtn = document.getElementById('eyeBtn');
 
-        // ===== Credentials =====
-        var CREDS = { username: 'admin', password: 'vasavi123' };
-
         // ===== Toggle password =====
         eyeBtn.addEventListener('click', function () {
             var show = pInput.type === 'password';
@@ -161,8 +167,8 @@
             document.getElementById('grpPass').classList.remove('error');
         }
 
-        // ===== Submit =====
-        form.addEventListener('submit', function (e) {
+        // ===== Submit (Now with Supabase Verification) =====
+        form.addEventListener('submit', async function (e) {
             e.preventDefault();
             var u = uInput.value.trim();
             var p = pInput.value.trim();
@@ -177,21 +183,34 @@
             loginBtn.classList.add('loading');
             loginBtn.disabled = true;
 
-            setTimeout(function () {
-                if (u === CREDS.username && p === CREDS.password) {
-                    sessionStorage.setItem('vasavi_auth', 'true');
-                    sessionStorage.setItem('vasavi_user', u);
-                    window.location.href = 'index.html';
-                } else {
-                    loginBtn.classList.remove('loading');
-                    loginBtn.disabled = false;
-                    showErr('Invalid username or password');
-                    document.getElementById('grpUser').classList.add('error');
-                    document.getElementById('grpPass').classList.add('error');
-                    shake();
-                    pInput.value = ''; pInput.focus();
+            try {
+                // Check against committee_logins table
+                const { data, error } = await supabase
+                    .from('committee_logins')
+                    .select('*')
+                    .eq('username', u)
+                    .eq('password', p)
+                    .single();
+
+                if (error || !data) {
+                    throw new Error('Invalid username or password');
                 }
-            }, 1000);
+
+                // SUCCESS
+                sessionStorage.setItem('vasavi_auth', 'true');
+                sessionStorage.setItem('vasavi_user', u);
+                sessionStorage.setItem('vasavi_role', data.role || 'Member');
+                window.location.href = 'index.html';
+
+            } catch (err) {
+                loginBtn.classList.remove('loading');
+                loginBtn.disabled = false;
+                showErr(err.message || 'Login failed ❌');
+                document.getElementById('grpUser').classList.add('error');
+                document.getElementById('grpPass').classList.add('error');
+                shake();
+                pInput.value = ''; pInput.focus();
+            }
         });
 
         function showErr(msg) { errorText.textContent = msg; errorBox.classList.add('show'); }
@@ -204,5 +223,6 @@
         uInput.focus();
     </script>
 </body>
+</html>
 
 </html>
