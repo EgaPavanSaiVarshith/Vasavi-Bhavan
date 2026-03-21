@@ -277,8 +277,7 @@ App.Form = {
             photo: this.photoData,
             aadhaar: this.aadhaarData,
             payment_proof: this.paymentData,
-            status: 'pending',
-            createdAt: new Date().toISOString()
+            status: 'pending'
         };
 
         // NEW: Supabase Insert
