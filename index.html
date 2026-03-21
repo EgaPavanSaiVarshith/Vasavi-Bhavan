@@ -9,7 +9,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <script>if(sessionStorage.getItem('vasavi_auth')!=='true') window.location.href='login.html';</script>
@@ -460,8 +459,14 @@
 
     <!-- Notification Panel -->
     <div class="notif-overlay" id="notifOverlay"></div>
-    <div class="notif-panel" id="notifPanel"><div class="notif-header"><h3>🔔 Notifications</h3><button class="notif-close" id="notifClose">&times;</button></div><div class="notif-body" id="notifBody"></div></div>
+    <div class="notif-panel" id="notifPanel">
+        <div class="notif-header">
+            <h3>🔔 Notifications</h3><button class="notif-close" id="notifClose">&times;</button>
+        </div>
+        <div class="notif-body" id="notifBody"></div>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="data.js"></script>
     <script src="dashboard.js"></script>
     <script src="committee.js"></script>

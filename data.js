@@ -25,7 +25,7 @@ App.DB = {
     // ===== COMMITTEE DATABASE =====
     getCommittee: function () {
         var data = localStorage.getItem(this.comKey);
-        return data ? JSON.select ? JSON.parse(data) : JSON.parse(data) : [];
+        return data ? JSON.parse(data) : [];
     },
     saveCommittee: function (members) {
         localStorage.setItem(this.comKey, JSON.stringify(members));

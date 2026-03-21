@@ -17,11 +17,12 @@ App.Form = {
     init: function () {
         var self = this;
         // Initialize Supabase safely
-        if (window.supabase) {
-            this.supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-            window.supabaseClient = this.supabase; // Global access if needed
-        } else {
-            console.error('Supabase library not loaded. Check your internet or CDN link.');
+        try {
+            if (window.supabase) {
+                this.supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            }
+        } catch (e) {
+            console.error('Supabase init error:', e);
         }
 
         // Type selection
