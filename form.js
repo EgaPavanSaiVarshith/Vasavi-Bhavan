@@ -1,10 +1,5 @@
-const supabaseUrl = "https://kgdkogczvsmbbptiuzap.supabase.co"
-const supabaseKey = "sb_publishable_ClfcDfNddcRaO0NA5hkXlw_GFCOJkOC"
-let supabaseClient = null;
-
 var App = window.App || {};
 App.Form = {
-    supabaseClient: null,
     editingId: null,
     regType: 'new',
     photoData: null,
@@ -13,14 +8,8 @@ App.Form = {
 
     init: function () {
         var self = this;
-        // Initialize Supabase safely
-        try {
-            if (window.supabase) {
-                this.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-            }
-        } catch (e) {
-            console.error('Supabase init error:', e);
-        }
+        // The Supabase client is now centrally managed in data.js (App.DB)
+        this.supabaseClient = App.DB.client;
 
         // Type selection
         document.getElementById('typeNew').addEventListener('click', function () { self._showForm('new'); });

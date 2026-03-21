@@ -4,7 +4,8 @@
 var App = window.App || {};
 App.currentView = 'dashboard';
 
-App.init = function () {
+App.init = async function () {
+    this.DB.init(); // NEW: Initialize Supabase first
     this.Form.init();
     this.Members.init();
     this.Calendar.init();
@@ -16,13 +17,13 @@ App.init = function () {
     this.Committee.init();
     this.Gallery.init();
     var hash = window.location.hash.replace('#', '') || 'dashboard';
-    this.navigate(hash);
-    this.refreshAll();
-    this._checkAlerts();
+    await this.navigate(hash);
+    await this.refreshAll();
+    await this._checkAlerts();
 };
 
 // ===== NAVIGATION =====
-App.navigate = function (v) {
+App.navigate = async function (v) {
     this.currentView = v;
     document.querySelectorAll('.view').forEach(function (el) { el.classList.remove('active'); });
     var t = document.getElementById('view-' + v); if (t) t.classList.add('active');
@@ -31,12 +32,12 @@ App.navigate = function (v) {
     document.getElementById('pageTitle').textContent = titles[v] || 'Dashboard';
     window.location.hash = v;
     this._closeSidebar();
-    if (v === 'dashboard') this.Dashboard.render();
-    if (v === 'committee') this.Committee.render();
-    if (v === 'members') this.Members.render();
-    if (v === 'calendar') this.Calendar.render();
-    if (v === 'gallery') this.Gallery.render();
-    if (v === 'pending') this._renderPending();
+    if (v === 'dashboard') await this.Dashboard.render();
+    if (v === 'committee') await this.Committee.render();
+    if (v === 'members') await this.Members.render();
+    if (v === 'calendar') await this.Calendar.render();
+    if (v === 'gallery') await this.Gallery.render();
+    if (v === 'pending') await this._renderPending();
     if (v === 'register') this.Form._showStep1();
 };
 
