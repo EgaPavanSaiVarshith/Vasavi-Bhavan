@@ -3,18 +3,27 @@
    ================================================================ */
 const supabaseUrl = "https://kgdkogczvsmbbptiuzap.supabase.co"
 const supabaseKey = "sb_publishable_ClfcDfNddcRaO0NA5hkXlw_GFCOJkOC"
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+let supabase = null;
 
 var App = window.App || {};
 App.Form = {
+    supabase: null,
     editingId: null,
-    regType: 'new', // 'new' or 'update'
+    regType: 'new',
     photoData: null,
     aadhaarData: null,
     paymentData: null,
 
     init: function () {
         var self = this;
+        // Initialize Supabase safely
+        if (window.supabase) {
+            this.supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            window.supabaseClient = this.supabase; // Global access if needed
+        } else {
+            console.error('Supabase library not loaded. Check your internet or CDN link.');
+        }
+
         // Type selection
         document.getElementById('typeNew').addEventListener('click', function () { self._showForm('new'); });
         document.getElementById('typeUpdate').addEventListener('click', function () { self._showUpdateSearch(); });
@@ -291,7 +300,12 @@ App.Form = {
         if (this.paymentData) data.paymentProof = this.paymentData;
 
         // NEW: Supabase Insert
-        const { data: res, error } = await supabase
+        if (!this.supabase) {
+            App.toast('Supabase not initialized! Check connection.', 'error');
+            return;
+        }
+
+        const { data: res, error } = await this.supabase
             .from('vasavi_members')
             .insert([data]);
 
