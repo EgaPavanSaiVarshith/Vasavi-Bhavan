@@ -8,25 +8,29 @@ App.DB = {
     comKey: 'vasavi_committee',
     galKey: 'vasavi_gallery',
 
+    _membersCache: null,
+
     init: function() {
-        if (window.supabase) {
+        if (window.supabase && !supabaseClient) {
             supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
             this.client = supabaseClient;
         }
     },
 
-    // ===== MAIN MEMBERS DATABASE (Now Async) =====
-    getAll: async function () { 
+    // ===== MAIN MEMBERS DATABASE (Now Faster & Async) =====
+    getAll: async function (forceRefresh) { 
         if (!supabaseClient) this.init();
+        if (this._membersCache && !forceRefresh) return this._membersCache;
+
         const { data, error } = await supabaseClient.from(this.key).select('*');
-        if (error) { console.error(error); return []; }
-        // Map common fields to match the rest of the app's expectations
-        return (data || []).map(m => Object.assign({ 
+        if (error) { console.error(error); return this._membersCache || []; }
+
+        this._membersCache = (data || []).map(m => Object.assign({ 
             memberName: m.name || 'Unknown', 
-            mobileNumber: m.phone || '0000000000',
-            dob: m.dob || '',
-            gothram: m.gothram || ''
+            mobileNumber: m.phone || '0', 
+            dob: m.dob || '' 
         }, m));
+        return this._membersCache;
     },
     getById: async function (id) { 
         const items = await this.getAll();
@@ -93,20 +97,25 @@ App.DB = {
         this.saveGallery(g.filter(function(x) { return x.id !== id; }));
     },
 
-    update: function (id, data) {
-        var members = this.getAll();
-        var idx = members.findIndex(function (m) { return m.id === id; });
-        if (idx === -1) return null;
-        Object.keys(data).forEach(function (k) { members[idx][k] = data[k]; });
-        members[idx].updatedAt = new Date().toISOString();
-        this._save(members);
-        return members[idx];
+    // Update member (Now Async)
+    update: async function (id, data) {
+        if (!supabaseClient) this.init();
+        const { error } = await supabaseClient.from(this.key).update(data).eq('id', id);
+        if (error) { console.error('Update error:', error); return false; }
+        this._membersCache = null; // Clear cache on change
+        return true;
     },
 
-    delete: function (id) { this._save(this.getAll().filter(function (m) { return m.id !== id; })); },
+    delete: async function (id) { 
+        if (!supabaseClient) this.init();
+        const { error } = await supabaseClient.from(this.key).delete().eq('id', id);
+        if (error) { console.error('Delete error:', error); return false; }
+        this._membersCache = null;
+        return true;
+    },
 
-    approve: function (id) { return this.update(id, { status: 'approved' }); },
-    reject: function (id) { return this.update(id, { status: 'rejected' }); },
+    approve: async function (id) { return await this.update(id, { status: 'approved' }); },
+    reject: async function (id) { return await this.update(id, { status: 'rejected' }); },
 
     // ===== QUERIES =====
     search: async function (query, statusFilter) {
