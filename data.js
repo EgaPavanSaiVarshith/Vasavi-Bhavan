@@ -5,6 +5,7 @@ var App = window.App || {};
 App.DB = {
     key: 'vasavi_members',
     comKey: 'vasavi_committee',
+    galKey: 'vasavi_gallery',
 
     // ===== MAIN MEMBERS DATABASE =====
     getAll: function () { try { return JSON.parse(localStorage.getItem(this.key) || '[]'); } catch (e) { return []; } },
@@ -43,6 +44,31 @@ App.DB = {
     deleteCommittee: function (id) {
         var c = this.getCommittee();
         this.saveCommittee(c.filter(function(x) { return x.id !== id; }));
+    },
+
+    // ===== GALLERY DATABASE =====
+    getGallery: function () {
+        var data = localStorage.getItem(this.galKey);
+        return data ? JSON.parse(data) : [];
+    },
+    saveGallery: function (items) {
+        localStorage.setItem(this.galKey, JSON.stringify(items));
+    },
+    addGallery: function (item) {
+        var g = this.getGallery();
+        item.id = 'GAL-' + Date.now();
+        item.createdAt = new Date().toISOString();
+        g.unshift(item);
+        this.saveGallery(g);
+        return item;
+    },
+    updateGallery: function (id, data) {
+        var g = this.getGallery(), idx = g.findIndex(function(x) { return x.id === id; });
+        if (idx !== -1) { g[idx] = Object.assign(g[idx], data); this.saveGallery(g); }
+    },
+    deleteGallery: function (id) {
+        var g = this.getGallery();
+        this.saveGallery(g.filter(function(x) { return x.id !== id; }));
     },
 
     update: function (id, data) {

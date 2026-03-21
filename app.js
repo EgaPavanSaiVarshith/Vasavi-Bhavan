@@ -14,7 +14,8 @@ App.init = function () {
     this._setupLogout();
     this._setupImageModal();
     this.Committee.init();
-    var hash = window.location.hash.replace('#', '') || 'committee';
+    this.Gallery.init();
+    var hash = window.location.hash.replace('#', '') || 'dashboard';
     this.navigate(hash);
     this.refreshAll();
     this._checkAlerts();
@@ -26,14 +27,15 @@ App.navigate = function (v) {
     document.querySelectorAll('.view').forEach(function (el) { el.classList.remove('active'); });
     var t = document.getElementById('view-' + v); if (t) t.classList.add('active');
     document.querySelectorAll('.nav-item[data-view]').forEach(function (a) { a.classList.toggle('active', a.getAttribute('data-view') === v); });
-    var titles = { committee: 'Committee Members', dashboard: 'Dashboard', register: 'Register Member', pending: 'Pending Approvals', members: 'Members List', calendar: 'Calendar' };
-    document.getElementById('pageTitle').textContent = titles[v] || 'Committee Members';
+    var titles = { committee: 'Committee Members', dashboard: 'Dashboard', register: 'Register Member', pending: 'Pending Approvals', members: 'Members List', calendar: 'Calendar', gallery: 'Photo Gallery' };
+    document.getElementById('pageTitle').textContent = titles[v] || 'Dashboard';
     window.location.hash = v;
     this._closeSidebar();
     if (v === 'dashboard') this.Dashboard.render();
     if (v === 'committee') this.Committee.render();
     if (v === 'members') this.Members.render();
     if (v === 'calendar') this.Calendar.render();
+    if (v === 'gallery') this.Gallery.render();
     if (v === 'pending') this._renderPending();
     if (v === 'register') this.Form._showStep1();
 };
