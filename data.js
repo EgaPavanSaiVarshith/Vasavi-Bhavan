@@ -181,8 +181,22 @@ App.DB = {
     getApproved: async function () { return this.getByStatus('approved'); },
     getPending: async function () { return this.getByStatus('pending'); },
 
-    _isToday: function (ds) { if (!ds) return false; var d = new Date(ds), n = new Date(); return d.getDate() === n.getDate() && d.getMonth() === n.getMonth(); },
-    _daysUntilNext: function (ds) { if (!ds) return 999; var t = new Date(); t.setHours(0, 0, 0, 0); var d = new Date(ds), nx = new Date(t.getFullYear(), d.getMonth(), d.getDate()); if (nx < t) nx.setFullYear(t.getFullYear() + 1); return Math.round((nx - t) / 864e5); },
+    _isToday: function (ds) { 
+        if (!ds) return false; 
+        var n = new Date();
+        var pts = ds.split('-'); if (pts.length < 3) return false;
+        var y = parseInt(pts[0]), m = parseInt(pts[1]) - 1, d = parseInt(pts[2]);
+        return d === n.getDate() && m === n.getMonth(); 
+    },
+    _daysUntilNext: function (ds) { 
+        if (!ds) return 999; 
+        var n = new Date(); n.setHours(0,0,0,0);
+        var pts = ds.split('-'); if (pts.length < 3) return 999;
+        var m = parseInt(pts[1]) - 1, d = parseInt(pts[2]);
+        var nx = new Date(n.getFullYear(), m, d);
+        if (nx < n) nx.setFullYear(n.getFullYear() + 1);
+        return Math.round((nx - n) / 864e5);
+    },
 
     getTodayBirthdays: async function () { 
         const approved = await this.getApproved();
