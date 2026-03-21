@@ -7,6 +7,7 @@ App.Gallery = {
     editingId: null,
     currentViewItems: [], // Images in current viewing session
     currentViewIdx: 0,
+    slideshowInterval: null,
 
     init: function () {
         var self = this;
@@ -184,9 +185,9 @@ App.Gallery = {
             var count = photos.length;
             var cover = photos[0];
 
-            return '<div class="gal-card">' +
+            return '<div class="gal-card" data-id="' + item.id + '" data-photo-idx="0">' +
                 '<div class="gal-img-box" onclick="App.Gallery.viewEvent(\'' + item.id + '\')">' +
-                '<img src="' + cover + '" alt="' + App.Utils.escapeHtml(item.title) + '">' +
+                '<img class="gal-card-img" src="' + cover + '" alt="' + App.Utils.escapeHtml(item.title) + '">' +
                 '<div class="gal-overlay"><span>👁️ View ' + count + ' ' + (count > 1 ? 'Photos' : 'Photo') + '</span></div>' +
                 '<div class="gal-badge">' + count + ' 📷</div>' +
                 '</div>' +
@@ -200,6 +201,40 @@ App.Gallery = {
                 '</div>' +
                 '</div>';
         }).join('');
+
+        this._startSlideshow();
+    },
+
+    _startSlideshow: function () {
+        var self = this;
+        if (this.slideshowInterval) clearInterval(this.slideshowInterval);
+        
+        this.slideshowInterval = setInterval(function () {
+            var cards = document.querySelectorAll('.gal-card');
+            var gallery = App.DB.getGallery();
+            
+            cards.forEach(function (card) {
+                var id = card.getAttribute('data-id');
+                var event = gallery.find(function(x) { return x.id === id; });
+                if (!event) return;
+                
+                var photos = event.images || (event.image ? [event.image] : []);
+                if (photos.length <= 1) return;
+                
+                var currentIdx = parseInt(card.getAttribute('data-photo-idx'));
+                var nextIdx = (currentIdx + 1) % photos.length;
+                
+                var img = card.querySelector('.gal-card-img');
+                if (img) {
+                    img.style.opacity = '0.4'; // Quick fade effect
+                    setTimeout(function() {
+                        img.src = photos[nextIdx];
+                        img.style.opacity = '1';
+                        card.setAttribute('data-photo-idx', nextIdx);
+                    }, 500);
+                }
+            });
+        }, 30000); // 30 seconds
     },
 
     viewEvent: function (id) {

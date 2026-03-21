@@ -301,7 +301,10 @@ tbody td{padding:12px 16px;color:var(--c-text-sec);white-space:nowrap} tbody td:
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform .6s var(--ease);
+    transition: transform .6s var(--ease), opacity .5s ease;
+}
+.gal-card-img {
+    transition: opacity .5s ease;
 }
 .gal-card:hover .gal-img-box img {
     transform: scale(1.08);
