@@ -18,8 +18,8 @@ App.init = async function () {
     this.Gallery.init();
     var hash = window.location.hash.replace('#', '') || 'dashboard';
     await this.navigate(hash);
-    await this.refreshAll();
-    await this._checkAlerts();
+    this.refreshAll();
+    this._checkAlerts();
 };
 
 // ===== NAVIGATION =====

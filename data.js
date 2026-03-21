@@ -18,12 +18,29 @@ App.DB = {
     },
 
     // ===== MAIN MEMBERS DATABASE (Now Faster & Async) =====
+    // ===== MAIN MEMBERS DATABASE (Instant Load Logic) =====
     getAll: async function (forceRefresh) { 
         if (!supabaseClient) this.init();
         if (this._membersCache && !forceRefresh) return this._membersCache;
 
+        // Try to load from LocalStorage first for an instant feel
+        if (!this._membersCache) {
+            try { 
+                var local = localStorage.getItem(this.key);
+                if (local) {
+                    this._membersCache = JSON.parse(local);
+                    this._syncFromSupabase(); // Start live refresh in background
+                    return this._membersCache;
+                }
+            } catch(e) {}
+        }
+        return await this._syncFromSupabase();
+    },
+
+    _syncFromSupabase: async function() {
+        if (!supabaseClient) this.init();
         const { data, error } = await supabaseClient.from(this.key).select('*');
-        if (error) { console.error(error); return this._membersCache || []; }
+        if (error) { console.error('Supabase fetch error:', error); return this._membersCache || []; }
 
         this._membersCache = (data || []).map(m => Object.assign({ 
             memberName: m.name || 'Unknown', 
@@ -40,6 +57,15 @@ App.DB = {
             paymentProof: m.payment_proof || '',
             createdAt: m.createdAt || m.created_at || new Date().toISOString()
         }, m));
+
+        // Save fresh copy to LocalStorage for next time
+        localStorage.setItem(this.key, JSON.stringify(this._membersCache));
+
+        // If the app is already running, trigger a silent re-render to show new data
+        if (window.App && window.App.refreshAll && !this._isSyncing) {
+            this._isSyncing = true;
+            setTimeout(() => { window.App.refreshAll(); this._isSyncing = false; }, 300);
+        }
         return this._membersCache;
     },
     getById: async function (id) { 
