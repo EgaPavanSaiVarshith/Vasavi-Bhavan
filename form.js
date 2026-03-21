@@ -11,7 +11,6 @@ App.Form = {
 
     init: function () {
         var self = this;
-        // The Supabase client is now centrally managed in data.js (App.DB)
         this.supabaseClient = App.DB.client;
 
         // Type selection
@@ -113,6 +112,7 @@ App.Form = {
     },
 
     _searchMember: async function () {
+        var self = this;
         var mobile = document.getElementById('searchMobile').value.trim();
         var result = document.getElementById('searchResult');
         if (!mobile || mobile.length !== 10) {
@@ -122,7 +122,7 @@ App.Form = {
         var member = await App.DB.findByMobile(mobile);
         if (member) {
             result.innerHTML = '<div class="search-found">✅ Member found: <strong>' + App.Utils.escapeHtml(member.memberName) + '</strong><br><small>Gothram: ' + App.Utils.escapeHtml(member.gothram) + '</small><br><br><button class="btn btn-primary btn-sm" id="loadFoundMember">Load Details</button></div>';
-            document.getElementById('loadFoundMember').addEventListener('click', () => this._showForm('update', member));
+            document.getElementById('loadFoundMember').addEventListener('click', function() { self._showForm('update', member); });
         } else {
             result.innerHTML = '<div class="search-not-found">❌ No member found with mobile ' + mobile + '</div><br><button class="btn btn-outline btn-sm" onclick="App.Form._showForm(\'update\', null)">Enter Details Directly</button>';
         }
@@ -132,16 +132,17 @@ App.Form = {
         var self = this, zone = document.getElementById(zoneId), input = document.getElementById(inputId);
         var ph = document.getElementById(placeholderId), pv = document.getElementById(previewId), img = document.getElementById(imgId), nameEl = document.getElementById(nameId), rm = document.getElementById(removeId);
 
-        zone.onclick = (e) => { if (!e.target.closest('.remove-upload')) input.click(); };
-        input.onchange = () => { if (input.files[0]) this._processFile(input.files[0], dataKey, ph, pv, img, nameEl); };
-        rm.onclick = (e) => { e.stopPropagation(); this[dataKey+'Data'] = null; input.value = ''; pv.style.display = 'none'; ph.style.display = 'block'; };
+        zone.onclick = function (e) { if (!e.target.closest('.remove-upload')) input.click(); };
+        input.onchange = function () { if (input.files[0]) self._processFile(input.files[0], dataKey, ph, pv, img, nameEl); };
+        rm.onclick = function (e) { e.stopPropagation(); self[dataKey+'Data'] = null; input.value = ''; pv.style.display = 'none'; ph.style.display = 'block'; };
     },
 
     _processFile: function (file, dataKey, ph, pv, img, nameEl) {
         if (file.size > 2 * 1024 * 1024) { App.toast('File too large (Max 2MB)', 'error'); return; }
+        var self = this;
         var reader = new FileReader();
-        reader.onload = (e) => {
-            this[dataKey + 'Data'] = e.target.result;
+        reader.onload = function (e) {
+            self[dataKey + 'Data'] = e.target.result;
             img.src = e.target.result; nameEl.textContent = 'File selected';
             pv.style.display = 'block'; ph.style.display = 'none';
         };
@@ -156,19 +157,20 @@ App.Form = {
             { id: 'mobileNumber', msg: 'Mobile number is required' }
         ];
         var valid = true;
-        document.querySelectorAll('.form-group').forEach(fg => fg.classList.remove('has-error'));
-        rules.forEach(r => {
+        document.querySelectorAll('.form-group').forEach(function(fg) { fg.classList.remove('has-error'); });
+        rules.forEach(function(r) {
             var el = document.getElementById(r.id);
             if (!el.value.trim()) {
                 var fg = document.getElementById('fg-' + r.id); if (fg) fg.classList.add('has-error');
                 valid = false;
             }
         });
-        if (!this.photoData) { App.toast('Photo is required', 'error'); valid = false; }
+        if (!this.photoData && !this.editingId) { App.toast('Photo is required', 'error'); valid = false; }
         return valid;
     },
 
     handleSubmit: async function () {
+        var self = this;
         var data = {
             name: document.getElementById('memberName').value.trim(),
             phone: document.getElementById('mobileNumber').value.trim(),
@@ -181,18 +183,19 @@ App.Form = {
             address: document.getElementById('address').value.trim(),
             photo: this.photoData,
             aadhaar: this.aadhaarData,
-            payment_proof: this.paymentData,
-            status: this.editingId ? undefined : 'pending' // Preserve status on update
+            payment_proof: this.paymentData
         };
+        // Only set status for New records
+        if (!this.editingId) data.status = 'pending';
 
         if (this.editingId) {
-            var { error } = await App.DB.client.from('vasavi_members').update(data).eq('id', this.editingId);
-            if (error) App.toast('Error updating: ' + error.message, 'error');
-            else { App.toast('Updated successfully! ✅', 'success'); this._exit(); }
+            var res = await App.DB.client.from('vasavi_members').update(data).eq('id', this.editingId);
+            if (res.error) App.toast('Error updating: ' + res.error.message, 'error');
+            else { App.toast('Updated successfully! ✅', 'success'); self._exit(); }
         } else {
-            var { error } = await App.DB.client.from('vasavi_members').insert([data]);
-            if (error) App.toast('Error saving: ' + error.message, 'error');
-            else { App.toast('Registered successfully! ✅', 'success'); this._exit(); }
+            var res = await App.DB.client.from('vasavi_members').insert([data]);
+            if (res.error) App.toast('Error saving: ' + res.error.message, 'error');
+            else { App.toast('Registered successfully! ✅', 'success'); self._exit(); }
         }
     },
 
@@ -206,8 +209,8 @@ App.Form = {
     resetForm: function () {
         document.getElementById('memberForm').reset();
         this.editingId = null; this.photoData = null; this.aadhaarData = null; this.paymentData = null;
-        document.querySelectorAll('.upload-preview').forEach(p => p.style.display = 'none');
-        document.querySelectorAll('.upload-placeholder').forEach(p => p.style.display = 'block');
+        document.querySelectorAll('.upload-preview').forEach(function(p) { p.style.display = 'none'; });
+        document.querySelectorAll('.upload-placeholder').forEach(function(p) { p.style.display = 'block'; });
         this._showStep1();
     },
 

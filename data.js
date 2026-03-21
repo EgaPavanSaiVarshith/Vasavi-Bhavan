@@ -42,7 +42,7 @@ App.DB = {
         const { data, error } = await supabaseClient.from(this.key).select('*');
         if (error) { console.error('Supabase fetch error:', error); return this._membersCache || []; }
 
-        this._membersCache = (data || []).map(m => Object.assign({ 
+        this._membersCache = (data || []).map(function(m) { return Object.assign({ 
             memberName: m.name || 'Unknown', 
             mobileNumber: m.phone || '0', 
             dob: m.dob || '',
@@ -56,7 +56,7 @@ App.DB = {
             aadhaarFile: m.aadhaar || '',
             paymentProof: m.payment_proof || '',
             createdAt: m.createdAt || m.created_at || new Date().toISOString()
-        }, m));
+        }, m); });
 
         // Save fresh copy to LocalStorage for next time
         localStorage.setItem(this.key, JSON.stringify(this._membersCache));
@@ -64,7 +64,8 @@ App.DB = {
         // If the app is already running, trigger a silent re-render to show new data
         if (window.App && window.App.refreshAll && !this._isSyncing) {
             this._isSyncing = true;
-            setTimeout(() => { window.App.refreshAll(); this._isSyncing = false; }, 300);
+            var self = this;
+            setTimeout(function() { window.App.refreshAll(); self._isSyncing = false; }, 300);
         }
         return this._membersCache;
     },
@@ -199,12 +200,14 @@ App.DB = {
     },
 
     getTodayBirthdays: async function () { 
+        var self = this;
         const approved = await this.getApproved();
-        return approved.filter(m => this._isToday(m.dob)); 
+        return approved.filter(function(m) { return self._isToday(m.dob); }); 
     },
     getTodayAnniversaries: async function () { 
+        var self = this;
         const approved = await this.getApproved();
-        return approved.filter(m => this._isToday(m.marriageDay)); 
+        return approved.filter(function(m) { return self._isToday(m.marriageDay); }); 
     },
 
     getUpcomingEvents: async function (days) {
