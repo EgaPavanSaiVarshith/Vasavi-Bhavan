@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sri Vasavi Kanyakaparameshwari Kalyana Mandapam Committee - Membership Management">
+    <title>SVKP Kalyana Mandapam - Membership Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <script>if(sessionStorage.getItem('vasavi_auth')!=='true') window.location.href='login.html';</script>
+
+    <div class="app" id="app">
+        <div class="bg-watermark"></div>
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo"><span>🙏</span></div>
+                <div class="brand-info">
+                    <span class="brand-name" style="font-size:0.85rem;line-height:1.2;white-space:normal;font-weight:700">SRI VASAVI KANYAKA PARAMESHWERI<br>KALYANA MANDAPAM COMITEE</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav" id="sidebarNav">
+                <a class="nav-item active" data-view="dashboard" href="#dashboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a class="nav-item" data-view="register" href="#register">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    <span>Register Member</span>
+                </a>
+                <a class="nav-item" data-view="committee" href="#committee">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    <span>Committee Members</span>
+                </a>
+                <a class="nav-item" data-view="pending" href="#pending">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Pending Approvals</span>
+                    <span class="nav-badge" id="pendingBadge" style="display:none">0</span>
+                </a>
+                <a class="nav-item" data-view="members" href="#members">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                    <span>Members List</span>
+                </a>
+                <a class="nav-item" data-view="calendar" href="#calendar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>Calendar</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="nav-item logout-item" id="logoutBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ===== MAIN ===== -->
+        <div class="main-wrapper">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menuToggle"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+                    <h1 class="page-title" id="pageTitle">Dashboard</h1>
+                </div>
+                <div class="topbar-right">
+                    <button class="notif-toggle" id="notifToggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="notif-badge" id="notifBadge" style="display:none">0</span></button>
+                    <div class="user-pill"><div class="user-avatar">A</div><span class="user-name">Admin</span></div>
+                </div>
+            </header>
+
+            <div class="content-area" id="contentArea">
+
+                <!-- ========== DASHBOARD ========== -->
+                <section class="view active" id="view-dashboard">
+                    <div class="metrics-row">
+                        <div class="metric-card mc-total"><div class="mc-icon">👥</div><div class="mc-data"><span class="mc-value" id="metricTotal">0</span><span class="mc-label">Total Members</span></div></div>
+                        <div class="metric-card mc-pending"><div class="mc-icon">⏳</div><div class="mc-data"><span class="mc-value" id="metricPending">0</span><span class="mc-label">Pending Approvals</span></div></div>
+                        <div class="metric-card mc-birthday"><div class="mc-icon">🎂</div><div class="mc-data"><span class="mc-value" id="metricBirthdays">0</span><span class="mc-label">Today's Birthdays</span></div></div>
+                        <div class="metric-card mc-anniversary"><div class="mc-icon">💍</div><div class="mc-data"><span class="mc-value" id="metricAnniversaries">0</span><span class="mc-label">Today's Anniversaries</span></div></div>
+                    </div>
+                    <div class="dash-grid">
+                        <div class="dash-card"><div class="dc-header"><h3>🎂 Today's Birthdays</h3></div><div class="dc-body" id="dashBirthdays"><p class="empty-state">No birthdays today</p></div></div>
+                        <div class="dash-card"><div class="dc-header"><h3>💍 Today's Anniversaries</h3></div><div class="dc-body" id="dashAnniversaries"><p class="empty-state">No anniversaries today</p></div></div>
+                        <div class="dash-card wide"><div class="dc-header"><h3>📅 Upcoming Events (7 Days)</h3></div><div class="dc-body" id="dashUpcoming"><p class="empty-state">No upcoming events</p></div></div>
+                        <div class="dash-card wide"><div class="dc-header"><h3>🆕 Recent Members</h3></div><div class="dc-body" id="dashRecent"><p class="empty-state">No members yet</p></div></div>
+                    </div>
+                </section>
+
+                <!-- ========== REGISTER ========== -->
+                <section class="view" id="view-register">
+                    <!-- Step 1: Type Selection -->
+                    <div class="reg-step" id="regStep1">
+                        <div class="step-header"><h2>Membership Registration</h2><p>Choose your registration type below</p></div>
+                        <div class="type-cards">
+                            <div class="type-card" id="typeNew">
+                                <div class="tc-icon">✨</div>
+                                <h3>New Member Registration</h3>
+                                <p>Register as a new member with identity verification and payment</p>
+                                <span class="tc-arrow">→</span>
+                            </div>
+                            <div class="type-card" id="typeUpdate">
+                                <div class="tc-icon">🔄</div>
+                                <h3>Update Existing Details</h3>
+                                <p>Search your record by mobile number and update your information</p>
+                                <span class="tc-arrow">→</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2a: Search for Update -->
+                    <div class="reg-step" id="regStep2a" style="display:none">
+                        <button class="back-link" id="backFromSearch">← Back to options</button>
+                        <div class="search-member-card">
+                            <h2>🔍 Find Your Membership</h2>
+                            <p>Enter your registered mobile number to find your record</p>
+                            <div class="search-member-input">
+                                <input type="tel" id="searchMobile" placeholder="10-digit mobile number" maxlength="10">
+                                <button class="btn btn-primary" id="searchMemberBtn">Search</button>
+                            </div>
+                            <div id="searchResult"></div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2b: The Form -->
+                    <div class="reg-step" id="regStep2b" style="display:none">
+                        <button class="back-link" id="backFromForm">← Back to options</button>
+                        <div class="form-card">
+                            <div class="form-card-header">
+                                <h1 style="text-align:center;font-family:var(--fd);font-size:1.4rem;color:var(--c-primary);line-height:1.4">SRI VASAVI KANYAKA PARAMESHWERI<br>KALYANA MANDAPAM COMITEE</h1>
+                                <h2 style="text-align:center;font-size:.8rem;color:var(--c-text-muted);font-weight:600;margin-top:6px;line-height:1.5">H.NO-- 5-12, KUSUMANCHI ROAD, NELAKONDAPALLY,<br>KHAMMAM DIST - REGISTERED NUMBER 56/2026</h2>
+                                <hr style="border:0;border-top:1px solid var(--c-border);margin:24px 0">
+                                <h2 id="formTitle">New Member Registration</h2>
+                                <p id="formSubtitle">Fill in the details below to register</p>
+                            </div>
+                            <form id="memberForm" novalidate>
+                                <input type="hidden" id="editMemberId" value="">
+                                <input type="hidden" id="regType" value="new">
+
+                                <!-- Personal Details -->
+                                <div class="form-section">
+                                    <h3 class="fs-title"><span>👤</span> Personal Details</h3>
+                                    
+                                    <div style="margin-bottom:24px;">
+                                        <label style="display:block;font-size:.82rem;font-weight:500;color:var(--c-text-sec);margin-bottom:6px;">Passport Size Photo <span class="req">*</span></label>
+                                        <div class="upload-zone" id="photoZone" style="max-width:200px; padding:16px;">
+                                            <input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp" hidden>
+                                            <div class="upload-placeholder" id="photoPlaceholder" style="padding:16px;">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                                <p style="font-size:0.8rem">Upload Photo</p>
+                                            </div>
+                                            <div class="upload-preview" id="photoPreview" style="display:none; padding:8px;">
+                                                <img id="photoImg" alt="Photo Preview" style="width:100%; height:140px; object-fit:cover; border-radius:4px;">
+                                                <div class="upload-file-name" id="photoFileName" style="font-size:0.75rem"></div>
+                                                <button type="button" class="remove-upload" id="removePhoto" style="padding:4px 8px; font-size:0.75rem;">✕ Remove</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-grid">
+                                        <div class="form-group" id="fg-memberName"><label for="memberName">Member Name <span class="req">*</span></label><input type="text" id="memberName" placeholder="Enter full name" required><span class="fg-error"></span></div>
+                                        <div class="form-group" id="fg-dob"><label for="dob">Date of Birth <span class="req">*</span></label><input type="date" id="dob" required><span class="fg-error"></span></div>
+                                        <div class="form-group" id="fg-fatherName"><label for="fatherName">Father's Name <span class="req">*</span></label><input type="text" id="fatherName" placeholder="Enter father's name" required><span class="fg-error"></span></div>
+                                        <div class="form-group" id="fg-spouseName"><label for="spouseName">Spouse Name</label><input type="text" id="spouseName" placeholder="Enter spouse's name"></div>
+                                        <div class="form-group" id="fg-gothram"><label for="gothram">Gothram <span class="req">*</span></label><input type="text" id="gothram" placeholder="Enter gothram" required><span class="fg-error"></span></div>
+                                        <div class="form-group" id="fg-bloodGroup"><label for="bloodGroup">Blood Group <span class="req">*</span></label><select id="bloodGroup" required><option value="">Select Blood Group</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="AB+">AB+</option><option value="AB-">AB-</option><option value="O+">O+</option><option value="O-">O-</option></select><span class="fg-error"></span></div>
+                                    </div>
+                                </div>
+
+                                <!-- Marriage Details -->
+                                <div class="form-section">
+                                    <h3 class="fs-title"><span>💍</span> Marriage Details</h3>
+                                    <div class="form-grid"><div class="form-group" id="fg-marriageDay"><label for="marriageDay">Marriage Date</label><input type="date" id="marriageDay"></div></div>
+                                </div>
+
+                                <!-- Contact Details -->
+                                <div class="form-section">
+                                    <h3 class="fs-title"><span>📞</span> Contact Details</h3>
+                                    <div class="form-grid">
+                                        <div class="form-group full" id="fg-address"><label for="address">Address <span class="req">*</span></label><textarea id="address" rows="3" placeholder="Enter full address" required></textarea><span class="fg-error"></span></div>
+                                        <div class="form-group" id="fg-mobileNumber"><label for="mobileNumber">Mobile Number <span class="req">*</span></label><input type="tel" id="mobileNumber" placeholder="10-digit mobile" maxlength="10" required><span class="fg-error"></span></div>
+                                    </div>
+                                </div>
+
+                                <!-- Committee History (Only shown during updates) -->
+                                <div class="form-section" id="committeeUpdateSection" style="display:none">
+                                    <h3 class="fs-title"><span>🏛️</span> Committee Posts (Optional)</h3>
+                                    <div class="form-grid">
+                                        <div class="form-group" id="fg-presentPost">
+                                            <label for="presentPost">Present Post</label>
+                                            <input type="text" id="presentPost" placeholder="E.g. Joint Secretary">
+                                        </div>
+                                        <div class="form-group" id="fg-previousPost">
+                                            <label for="previousPost">Previous Post (with Year)</label>
+                                            <input type="text" id="previousPost" placeholder="E.g. Treasurer (2018-2020)">
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                                <!-- Aadhaar Upload -->
+                                <div class="form-section">
+                                    <h3 class="fs-title"><span>🆔</span> Identity Verification</h3>
+                                    <div class="upload-zone" id="aadhaarZone">
+                                        <input type="file" id="aadhaarFile" accept="image/jpeg,image/png,image/webp,application/pdf" hidden>
+                                        <div class="upload-placeholder" id="aadhaarPlaceholder">
+                                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                            <p>Click or drag to upload <strong>Aadhaar Card</strong></p>
+                                            <span>JPG, PNG or PDF • Max 2 MB</span>
+                                        </div>
+                                        <div class="upload-preview" id="aadhaarPreview" style="display:none">
+                                            <img id="aadhaarImg" alt="Aadhaar Preview">
+                                            <div class="upload-file-name" id="aadhaarFileName"></div>
+                                            <button type="button" class="remove-upload" id="removeAadhaar">✕ Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Section (New Members Only) -->
+                                <div class="form-section" id="paymentSection">
+                                    <h3 class="fs-title"><span>💳</span> Membership Fee Payment</h3>
+                                    <div class="payment-layout">
+                                        <div class="qr-box">
+                                            <p class="qr-label">Scan QR to Pay Membership Fee</p>
+                                            <div class="qr-amount">₹ 1,000/-</div>
+                                            <img class="qr-img" id="paymentQr" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi%3A%2F%2Fpay%3Fpa%3Dsvkpmandapam%40sbi%26pn%3DSVKP%2520Mandapam%26am%3D1000%26cu%3DINR%26tn%3DMembership%2520Fee" alt="Payment QR Code">
+                                            <p class="qr-upi">UPI: svkpmandapam@sbi</p>
+                                        </div>
+                                        <div class="payment-upload">
+                                            <p class="payment-note">After payment, upload the screenshot or receipt below</p>
+                                            <div class="upload-zone" id="paymentZone">
+                                                <input type="file" id="paymentFile" accept="image/jpeg,image/png,image/webp,application/pdf" hidden>
+                                                <div class="upload-placeholder" id="paymentPlaceholder">
+                                                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                                    <p>Upload <strong>Payment Proof</strong></p>
+                                                    <span>JPG, PNG or PDF • Max 2 MB</span>
+                                                </div>
+                                                <div class="upload-preview" id="paymentPreview" style="display:none">
+                                                    <img id="paymentImg" alt="Payment Preview">
+                                                    <div class="upload-file-name" id="paymentFileName"></div>
+                                                    <button type="button" class="remove-upload" id="removePayment">✕ Remove</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Disclaimer -->
+                                <div class="form-section" id="disclaimerSection">
+                                    <div class="disclaimer-box">
+                                        <h4>⚖️ Important Notice</h4>
+                                        <p>The management of Sri Vasavi Kanyakaparameshwari Kalyana Mandapam Committee reserves the right to accept or reject any membership application without providing a reason. By submitting this form, you acknowledge and agree to this condition.</p>
+                                        <label class="checkbox-wrap" id="fg-agreeTerms">
+                                            <input type="checkbox" id="agreeTerms">
+                                            <span class="checkmark"></span>
+                                            <span>I agree to the above terms and conditions <span class="req">*</span></span>
+                                        </label>
+                                        <span class="fg-error" id="termsError"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-ghost" id="formReset">Reset</button>
+                                    <button type="submit" class="btn btn-primary" id="formSubmit"><span id="submitBtnText">Submit Registration</span></button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== PENDING APPROVALS ========== -->
+                <section class="view" id="view-pending">
+                    <div class="pending-header">
+                        <h2>Pending Membership Applications</h2>
+                        <p>Review and approve or reject new membership applications</p>
+                    </div>
+                    <div class="pending-list" id="pendingList"><p class="empty-state">No pending applications</p></div>
+                </section>
+
+                <!-- ========== COMMITTEE MEMBERS ========== -->
+                <section class="view" id="view-committee">
+                    <div class="committee-header" style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px">
+                        <div>
+                            <h2 style="font-family:var(--fd);font-size:1.4rem;font-weight:700">SRI VASAVI KANYAKA PARAMESHWERI KALYANA MANDAPAM COMITEE</h2>
+                            <p style="color:var(--c-text-muted);font-size:.8rem;margin-top:4px">H.NO-- 5-12, KUSUMANCHI ROAD, NELAKONDAPALLY, KHAMMAM DIST - REGISTERED NUMBER 56/2026</p>
+                        </div>
+                        <button class="btn btn-primary" id="showCommitteeFormBtn">➕ Add Member</button>
+                    </div>
+
+                    <!-- Committee Form Container -->
+                    <div class="form-card" id="committeeFormContainer" style="display:none; margin-bottom:40px; border-color:var(--c-primary-light);">
+                        <div class="form-card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <h3 style="font-size:1.1rem; font-weight:600;">Add / Edit Committee Member</h3>
+                                <p style="font-size:0.8rem; color:var(--c-text-muted);">Enter details specifically for the committee board</p>
+                            </div>
+                            <button class="btn btn-ghost btn-sm" id="cancelCommitteeForm">✕ Cancel</button>
+                        </div>
+                        <form id="committeeForm" style="padding:24px 32px;">
+                            <input type="hidden" id="comId">
+                            <div class="form-grid">
+                                <div class="form-group"><label>Member Name <span class="req">*</span></label><input type="text" id="comName" required></div>
+                                <div class="form-group"><label>Present Post <span class="req">*</span></label>
+                                    <select id="comRole" required>
+                                        <option value="">Select Role</option>
+                                        <option value="President">President</option>
+                                        <option value="Vice President">Vice President</option>
+                                        <option value="General Secretary">General Secretary</option>
+                                        <option value="Administrative Secretary">Administrative Secretary</option>
+                                        <option value="Treasurer">Treasurer</option>
+                                        <option value="Additional Treasurer">Additional Treasurer</option>
+                                        <option value="Joint Secretary">Joint Secretary</option>
+                                        <option value="Executive Member">Executive Member</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label>Previous Post (if any)</label><input type="text" id="comPrevRole" placeholder="E.g. Joint Secretary"></div>
+                                <div class="form-group"><label>Mobile Number <span class="req">*</span></label><input type="tel" id="comPhone" required maxlength="10"></div>
+                                
+                                <div class="form-group full">
+                                    <label>Profile Image <span class="req">*</span></label>
+                                    <div class="upload-zone" id="comPhotoZone" style="max-width:200px; padding:16px;">
+                                        <input type="file" id="comPhotoFile" accept="image/*" hidden>
+                                        <div class="upload-placeholder" id="comPhotoPlaceholder" style="padding:16px;">
+                                            <p style="font-size:0.8rem">Upload Image</p>
+                                        </div>
+                                        <div class="upload-preview" id="comPhotoPreview" style="display:none; padding:8px;">
+                                            <img id="comPhotoImg" style="width:100%; height:140px; object-fit:cover; border-radius:4px;">
+                                            <button type="button" class="remove-upload" id="removeComPhoto" style="padding:4px 8px; font-size:0.75rem;">✕ Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top:20px; text-align:right;">
+                                <button type="submit" class="btn btn-primary">Save Member</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="committeeContainer"></div>
+                </section>
+
+                <!-- ========== MEMBERS LIST ========== -->
+                <section class="view" id="view-members">
+                    <div class="members-toolbar">
+                        <div class="search-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="searchInput" placeholder="Search by name, mobile, gothram..."></div>
+                        <div class="toolbar-group">
+                            <select class="filter-select" id="statusFilter"><option value="all">All Status</option><option value="approved">Approved</option><option value="pending">Pending</option><option value="rejected">Rejected</option></select>
+                            <button class="btn btn-outline btn-sm" id="exportCsvBtn">📊 CSV</button>
+                            <button class="btn btn-outline btn-sm" id="exportExcelBtn">📗 Excel</button>
+                            <button class="btn btn-outline btn-sm" id="exportPrintBtn">🖨️ Print</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap" id="tableWrap"></div>
+                    <div class="pagination" id="pagination"></div>
+                </section>
+
+                <!-- ========== CALENDAR ========== -->
+                <section class="view" id="view-calendar">
+                    <div class="cal-controls">
+                        <button class="btn btn-icon" id="prevMonth"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+                        <h2 class="cal-title" id="calTitle">March 2026</h2>
+                        <button class="btn btn-icon" id="nextMonth"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+                        <button class="btn btn-outline btn-sm cal-today-btn" id="calTodayBtn">Today</button>
+                    </div>
+                    <div class="cal-legend"><span class="legend-item"><span class="legend-dot dot-birthday"></span> Birthday</span><span class="legend-item"><span class="legend-dot dot-anniversary"></span> Anniversary</span></div>
+                    <div class="cal-grid" id="calGrid"></div>
+                    <div class="cal-events" id="calEvents"><h3 id="calEventsTitle">Events</h3><div id="calEventsList"></div></div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Delete Modal -->
+    <div class="modal-overlay" id="deleteModal"><div class="modal-box"><div class="modal-icon">⚠️</div><h3>Delete Member</h3><p>Are you sure? This action cannot be undone.</p><div class="modal-actions"><button class="btn btn-ghost" id="cancelDelete">Cancel</button><button class="btn btn-danger" id="confirmDelete">Delete</button></div></div></div>
+
+    <!-- Image Viewer Modal -->
+    <div class="modal-overlay" id="imageModal"><div class="modal-box modal-img-box"><button class="modal-img-close" id="closeImageModal">✕</button><img id="modalImage" alt="Document Preview"></div></div>
+
+    <!-- Notification Panel -->
+    <div class="notif-overlay" id="notifOverlay"></div>
+    <div class="notif-panel" id="notifPanel"><div class="notif-header"><h3>🔔 Notifications</h3><button class="notif-close" id="notifClose">&times;</button></div><div class="notif-body" id="notifBody"></div></div>
+
+    <script src="data.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="committee.js"></script>
+    <script src="form.js"></script>
+    <script src="members.js"></script>
+    <script src="calendar.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
