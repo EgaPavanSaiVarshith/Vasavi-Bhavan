@@ -1,6 +1,10 @@
 /* ================================================================
    FORM MODULE v2 — Registration Type, File Uploads, Payment
    ================================================================ */
+const supabaseUrl = "https://kgdkogczvsmbbptiuzap.supabase.co"
+const supabaseKey = "sb_publishable_ClfcDfNddcRaO0NA5hkXlw_GFCOJkOC"
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
 var App = window.App || {};
 App.Form = {
     editingId: null,
@@ -52,7 +56,7 @@ App.Form = {
         document.getElementById('searchMobile').value = '';
         var res = document.getElementById('searchResult');
         res.innerHTML = '<div style="margin-top:24px; padding-top:24px; border-top:1px solid var(--c-border); text-align:center"><p style="font-size:0.88rem; color:var(--c-text-muted); margin-bottom:12px">Data not in the system yet?</p><button class="btn btn-outline" id="skipSearchBtn">Enter Details Directly</button></div>';
-        document.getElementById('skipSearchBtn').addEventListener('click', function() { App.Form._showForm('update', null); });
+        document.getElementById('skipSearchBtn').addEventListener('click', function () { App.Form._showForm('update', null); });
         document.getElementById('searchMobile').focus();
     },
 
@@ -66,7 +70,7 @@ App.Form = {
         // Show/hide payment and disclaimer
         document.getElementById('paymentSection').style.display = type === 'new' ? 'block' : 'none';
         document.getElementById('disclaimerSection').style.display = type === 'new' ? 'block' : 'none';
-        
+
         // Show committee fields ONLY for update/edit flows
         var comSec = document.getElementById('committeeUpdateSection');
         if (comSec) {
@@ -117,8 +121,8 @@ App.Form = {
         document.getElementById('marriageDay').value = m.marriageDay || '';
         document.getElementById('address').value = m.address || '';
         document.getElementById('mobileNumber').value = m.mobileNumber || '';
-        var pp = document.getElementById('presentPost'); if(pp) pp.value = m.presentPost || '';
-        var prevp = document.getElementById('previousPost'); if(prevp) prevp.value = m.previousPost || '';
+        var pp = document.getElementById('presentPost'); if (pp) pp.value = m.presentPost || '';
+        var prevp = document.getElementById('previousPost'); if (prevp) prevp.value = m.previousPost || '';
 
         // Restore uploaded files if present
         if (m.photoFile) {
@@ -154,7 +158,7 @@ App.Form = {
             });
         } else {
             result.innerHTML = '<div class="search-not-found">❌ No member found with mobile number ' + mobile + '</div><div style="margin-top:24px; padding-top:24px; border-top:1px solid var(--c-border); text-align:center"><p style="font-size:0.88rem; color:var(--c-text-muted); margin-bottom:12px">Data not in the system yet?</p><button class="btn btn-outline" id="skipSearchBtn2">Enter Details Directly</button></div>';
-            document.getElementById('skipSearchBtn2').addEventListener('click', function() { App.Form._showForm('update', null); });
+            document.getElementById('skipSearchBtn2').addEventListener('click', function () { App.Form._showForm('update', null); });
         }
     },
 
@@ -255,7 +259,7 @@ App.Form = {
     },
 
     // ===== SUBMIT =====
-    handleSubmit: function () {
+    handleSubmit: async function () {
         if (!this.validate()) {
             var fe = document.querySelector('#memberForm .form-group.has-error');
             if (fe) fe.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -272,35 +276,34 @@ App.Form = {
             bloodGroup: document.getElementById('bloodGroup').value,
             marriageDay: document.getElementById('marriageDay').value,
             address: document.getElementById('address').value.trim(),
-            mobileNumber: document.getElementById('mobileNumber').value.trim()
+            mobileNumber: document.getElementById('mobileNumber').value.trim(),
+            status: 'pending',
+            createdAt: new Date().toISOString()
         };
 
         if (this.regType === 'update' || this.regType === 'edit') {
-            var pp = document.getElementById('presentPost'); if(pp) data.presentPost = pp.value.trim();
-            var prevp = document.getElementById('previousPost'); if(prevp) data.previousPost = prevp.value.trim();
+            var pp = document.getElementById('presentPost'); if (pp) data.presentPost = pp.value.trim();
+            var prevp = document.getElementById('previousPost'); if (prevp) data.previousPost = prevp.value.trim();
         }
 
         if (this.photoData) data.photoFile = this.photoData;
         if (this.aadhaarData) data.aadhaarFile = this.aadhaarData;
         if (this.paymentData) data.paymentProof = this.paymentData;
 
-        if (this.editingId) {
-            App.DB.update(this.editingId, data);
-            App.toast('Member details updated successfully! ✅', 'success');
-        } else if (this.regType === 'new') {
-            data.status = 'pending';
-            data.memberType = 'new';
-            App.DB.create(data);
-            App.toast('Registration submitted! Awaiting admin approval. ⏳', 'success');
-        } else {
-            data.status = 'approved';
-            data.memberType = 'update';
-            App.DB.create(data);
-            App.toast('Details updated successfully! ✅', 'success');
-        }
+        // NEW: Supabase Insert
+        const { data: res, error } = await supabase
+            .from('vasavi_members')
+            .insert([data]);
 
-        this._showStep1();
-        App.refreshAll();
+        if (error) {
+            console.error(error);
+            App.toast('Error saving data ❌: ' + error.message, 'error');
+        } else {
+            App.toast('Saved successfully ✅', 'success');
+            this.resetForm();
+            this._showStep1();
+            if (window.App && window.App.refreshAll) window.App.refreshAll();
+        }
     },
 
     // ===== RESET =====
@@ -308,10 +311,10 @@ App.Form = {
         document.getElementById('memberForm').reset();
         this.editingId = null; this.photoData = null; this.aadhaarData = null; this.paymentData = null;
         document.getElementById('editMemberId').value = '';
-        var pp = document.getElementById('presentPost'); if(pp) pp.value = '';
-        var prevp = document.getElementById('previousPost'); if(prevp) prevp.value = '';
+        var pp = document.getElementById('presentPost'); if (pp) pp.value = '';
+        var prevp = document.getElementById('previousPost'); if (prevp) prevp.value = '';
         document.querySelectorAll('#memberForm .form-group').forEach(function (fg) { fg.classList.remove('has-error'); });
-        var pz = document.getElementById('photoZone'); if(pz) { pz.style.borderColor = ''; pz.style.boxShadow = ''; }
+        var pz = document.getElementById('photoZone'); if (pz) { pz.style.borderColor = ''; pz.style.boxShadow = ''; }
         // Reset upload previews
         ['photo', 'aadhaar', 'payment'].forEach(function (k) {
             var ph = document.getElementById(k + 'Placeholder'); var pv = document.getElementById(k + 'Preview');
