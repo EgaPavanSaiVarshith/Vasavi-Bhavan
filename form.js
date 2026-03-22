@@ -313,13 +313,34 @@ App.Form = {
                     .insert([data]);
             }
 
-            if (result.error) {
+                if (result.error) {
                 console.error(result.error);
                 App.toast('Error saving data ❌: ' + result.error.message, 'error');
             } else {
-                App.toast('Saved successfully ✅', 'success');
                 this.resetForm();
                 this._showStep1();
+                if (this.editingId) {
+                    App.toast('Member details updated successfully. ✅', 'success');
+                } else {
+                    // Show a full-screen success message for new registrations
+                    var regStep1 = document.getElementById('regStep1');
+                    if (regStep1) {
+                        regStep1.innerHTML = `
+                        <div style="text-align:center; padding:60px 24px; max-width:560px; margin:0 auto">
+                            <div style="font-size:4rem; margin-bottom:20px">✅</div>
+                            <h2 style="font-family:var(--fd); font-size:1.5rem; font-weight:700; color:var(--c-primary-light); margin-bottom:16px">Application Submitted Successfully!</h2>
+                            <p style="color:var(--c-text-sec); font-size:0.9rem; line-height:1.8; margin-bottom:24px">
+                                Thank you for applying for membership at <strong>Sri Vasavi Kanyakaparameshwari Kalyana Mandapam Committee</strong>.<br><br>
+                                Your application has been received and is currently <strong>under review</strong> by the committee. You will be notified once your membership has been approved.<br><br>
+                                <em>Please retain this page as confirmation of your submission.</em>
+                            </p>
+                            <div style="background:rgba(136,14,79,0.08); border:1px solid rgba(136,14,79,0.2); border-radius:10px; padding:16px; font-size:0.82rem; color:var(--c-text-muted)">
+                                ⏳ <strong>Status:</strong> Awaiting Committee Approval
+                            </div>
+                            <button class="btn btn-primary" style="margin-top:28px" onclick="location.reload()">➕ Submit Another Application</button>
+                        </div>`;
+                    }
+                }
                 if (window.App && window.App.refreshAll) await window.App.refreshAll();
             }
         } catch (err) {
