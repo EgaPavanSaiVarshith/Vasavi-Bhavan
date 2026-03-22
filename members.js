@@ -58,7 +58,7 @@ App.Members = {
 
     // ===== PRINT INDIVIDUAL RECEIPT (Instant Synchronous Download) =====
     printForm: async function (id) {
-        var m = await App.DB.getById(id); if (!m) return;
+        var m = await App.DB.getByIdFull(id); if (!m) return;
         var esc = App.Utils.escapeHtml, fd = App.Utils.formatDateLong;
         var photoUrl = m.photo || m.photoFile;
         var aadhaarUrl = m.aadhaar || m.aadhaarFile;

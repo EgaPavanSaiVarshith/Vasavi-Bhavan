@@ -174,7 +174,7 @@ App._setupImageModal = function () {
     document.getElementById('imageModal').addEventListener('click', function (e) { if (e.target === this) this.classList.remove('show'); });
 };
 App.viewImage = async function (id, type) {
-    var m = await App.DB.getById(id); if (!m) return;
+    var m = await App.DB.getByIdFull(id); if (!m) return;
     var src = type === 'aadhaar' ? (m.aadhaar || m.aadhaarFile) : m.paymentProof;
     if (!src) { this.toast('No document uploaded', 'warning'); return; }
     document.getElementById('modalImage').src = src;

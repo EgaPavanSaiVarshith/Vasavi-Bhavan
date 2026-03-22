@@ -17,7 +17,6 @@ App.DB = {
         }
     },
 
-    // ===== MAIN MEMBERS DATABASE (Now Faster & Async) =====
     // ===== MAIN MEMBERS DATABASE (Instant Load Logic) =====
     getAll: async function (forceRefresh) { 
         if (!supabaseClient) this.init();
@@ -29,7 +28,7 @@ App.DB = {
                 var parsed = JSON.parse(local);
                 if (parsed && parsed.length > 0) {
                     this._membersCache = parsed;
-                    this._syncFromSupabase(); 
+                    this._syncFromSupabase(); // silent background refresh
                     return this._membersCache;
                 }
             }
@@ -39,10 +38,13 @@ App.DB = {
 
     _syncFromSupabase: async function() {
         if (!supabaseClient) this.init();
-        const { data, error } = await supabaseClient.from(this.key).select('*');
+        // Fetch LIGHTWEIGHT columns only — excludes large base64 photo/aadhaar/payment fields
+        // This keeps response tiny and fast (~100x smaller), and fits in LocalStorage
+        const { data, error } = await supabaseClient
+            .from(this.key)
+            .select('id, name, phone, status, dob, father_name, spouse_name, gothram, blood_group, marriage_day, address, present_post, previous_post, created_at');
         if (error) { 
             console.error('Supabase fetch error:', error); 
-            if (window.App && App.toast) App.toast('Fetch error: ' + error.message, 'error');
             return this._membersCache || []; 
         }
 
@@ -56,23 +58,59 @@ App.DB = {
             bloodGroup: m.blood_group || '',
             marriageDay: m.marriage_day || '',
             address: m.address || '',
-            photoData: m.photo || '',
-            aadhaarFile: m.aadhaar || '',
-            paymentProof: m.payment_proof || '',
             presentPost: m.present_post || '',
             previousPost: m.previous_post || '',
-            createdAt: m.createdAt || m.created_at || new Date().toISOString()
+            createdAt: m.created_at || new Date().toISOString()
         }, m));
 
-        // Safety Save
-        try { localStorage.setItem(this.key, JSON.stringify(this._membersCache)); } catch(e) { console.warn('LocalStorage Quota Exceeded'); }
+        // Now fits in LocalStorage since we excluded large base64 fields
+        try { localStorage.setItem(this.key, JSON.stringify(this._membersCache)); } catch(e) { console.warn('LocalStorage save failed:', e); }
+
+        // Re-render current view if members/pending/dashboard is open
+        if (window.App && App.currentView) {
+            var v = App.currentView;
+            if (v === 'members') App.Members.render();
+            else if (v === 'pending') App._renderPending();
+            else if (v === 'dashboard') App.Dashboard.render();
+        }
 
         return this._membersCache;
     },
+
+    // getById — lightweight (for list/dashboard). For printing, use getByIdFull
     getById: async function (id, forceRefresh) { 
         const items = await this.getAll(forceRefresh);
         return items.find(function (m) { return String(m.id) === String(id); }) || null; 
     },
+
+    // getByIdFull — fetches ALL columns including photos, for receipt printing
+    getByIdFull: async function (id) {
+        if (!supabaseClient) this.init();
+        const { data, error } = await supabaseClient.from(this.key).select('*').eq('id', id).single();
+        if (error) { console.error('getByIdFull error:', error); return null; }
+        if (!data) return null;
+        return Object.assign({
+            memberName: data.name || 'Unknown',
+            mobileNumber: data.phone || '0',
+            dob: data.dob || '',
+            fatherName: data.father_name || '',
+            spouseName: data.spouse_name || '',
+            gothram: data.gothram || '',
+            bloodGroup: data.blood_group || '',
+            marriageDay: data.marriage_day || '',
+            address: data.address || '',
+            photoData: data.photo || '',
+            aadhaarFile: data.aadhaar || '',
+            paymentProof: data.payment_proof || '',
+            createdAt: data.created_at || new Date().toISOString()
+        }, data);
+    },
+
+    getByIdSync: function (id) { 
+        if (!this._membersCache) return null;
+        return this._membersCache.find(function (m) { return String(m.id) === String(id); }) || null; 
+    },
+
 
     create: function (member) {
         var members = this.getAll();
