@@ -368,7 +368,9 @@ App.DB = {
     search: async function (query, statusFilter) {
         query = (query || '').toLowerCase().trim();
         var members = await this.getAll();
-        if (statusFilter && statusFilter !== 'all') members = members.filter(function (m) { return m.status === statusFilter; });
+        // Default: only show APPROVED members. Admin can switch filter to see others.
+        var activeFilter = (statusFilter && statusFilter !== 'all') ? statusFilter : 'approved';
+        members = members.filter(function (m) { return m.status === activeFilter; });
         if (!query) return members;
         return members.filter(function (m) {
             return (m.name || m.memberName || '').toLowerCase().includes(query) ||
