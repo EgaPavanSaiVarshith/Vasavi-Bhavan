@@ -70,7 +70,7 @@ App.Committee = {
             this.editingId = member.id;
             document.getElementById('comName').value = member.name || '';
             document.getElementById('comRole').value = member.role || '';
-            document.getElementById('comPrevRole').value = member.prevRole || '';
+            document.getElementById('comPrevRole').value = member.prev_role || '';
             document.getElementById('comPhone').value = member.mobile || '';
             if (member.image) {
                 this.comPhotoData = member.image;
@@ -101,7 +101,7 @@ App.Committee = {
         var data = {
             name: name,
             role: role,
-            prevRole: prevRole,
+            prev_role: prevRole,
             mobile: mobile
         };
         if (this.comPhotoData) data.image = this.comPhotoData;
@@ -168,7 +168,7 @@ App.Committee = {
                 ? '<img src="' + m.image + '" alt="' + App.Utils.escapeHtml(m.name) + '">' 
                 : '<div class="com-img-placeholder">👤</div>';
                 
-            var prevText = m.prevRole ? '<div class="com-prev-role">Prev: ' + App.Utils.escapeHtml(m.prevRole) + '</div>' : '';
+            var prevText = m.prev_role ? '<div class="com-prev-role">Prev: ' + App.Utils.escapeHtml(m.prev_role) + '</div>' : '';
 
             html += '<div class="com-card">'
                  + '<div style="position:absolute;top:10px;right:10px;display:flex;gap:6px">'
