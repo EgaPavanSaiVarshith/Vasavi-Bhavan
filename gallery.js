@@ -21,6 +21,8 @@ App.Gallery = {
         // Setup Modal Navigation
         document.getElementById('prevImg').onclick = function(e) { e.stopPropagation(); self.prev(); };
         document.getElementById('nextImg').onclick = function(e) { e.stopPropagation(); self.next(); };
+        document.getElementById('closeImageModal').onclick = function() { document.getElementById('imageModal').classList.remove('show'); };
+        document.getElementById('imageModal').onclick = function(e) { if(e.target === this) this.classList.remove('show'); };
         
         // Keyboard support for modal
         window.addEventListener('keydown', function(e) {
@@ -240,12 +242,12 @@ App.Gallery = {
                     }, 500);
                 }
             });
-        }, 30000); // 30 seconds
+        }, 20000); // 20 seconds
     },
 
     viewEvent: async function (id) {
         var items = await App.DB.getGallery();
-        var item = items.find(function(x) { return x.id === id; });
+        var item = items.find(function(x) { return String(x.id) === String(id); });
         if (!item) return;
         
         this.currentViewItems = item.images || (item.image ? [item.image] : []);
@@ -285,9 +287,13 @@ App.Gallery = {
 
     delete: async function (id) {
         if (confirm('Are you sure you want to remove this memory from the gallery?')) {
-            await App.DB.deleteGallery(id);
-            App.toast('Removed from gallery', 'info');
-            await this.render();
+            var res = await App.DB.deleteGallery(id);
+            if (res.success) {
+                App.toast('Removed from gallery', 'info');
+                await this.render();
+            } else {
+                App.toast('Error removing memory: ' + res.error, 'error');
+            }
         }
     }
 };

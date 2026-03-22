@@ -125,15 +125,19 @@ App.Committee = {
 
     deleteMember: async function(id) {
         if (confirm('Are you sure you want to remove this committee member?')) {
-            await App.DB.deleteCommittee(id);
-            App.toast('Member removed', 'success');
-            await this.render();
+            var res = await App.DB.deleteCommittee(id);
+            if (res.success) {
+                App.toast('Member removed', 'success');
+                await this.render();
+            } else {
+                App.toast('Error removing member: ' + res.error, 'error');
+            }
         }
     },
 
     editMember: async function(id) {
         var items = await App.DB.getCommittee();
-        var c = items.find(function(m) { return m.id === id; });
+        var c = items.find(function(m) { return String(m.id) === String(id); });
         if (c) this._showForm(c);
     },
 
