@@ -101,8 +101,16 @@ App.DB = {
     },
     addCommittee: async function (member) {
         if (!supabaseClient) this.init();
-        member.created_at = new Date().toISOString();
-        const { error } = await supabaseClient.from(this.comKey).insert([member]);
+        // Explicitly construct payload to prevent accidental column mismatches
+        var payload = {
+            name: member.name,
+            role: member.role,
+            prev_role: member.prev_role || member.previous_role,
+            mobile: member.mobile || member.phone || '',
+            image: member.image,
+            created_at: new Date().toISOString()
+        };
+        const { error } = await supabaseClient.from(this.comKey).insert([payload]);
         if (error) { 
             console.error('Com insert error:', error); 
             return { success: false, error: 'Database error: ' + error.message }; 
@@ -111,7 +119,15 @@ App.DB = {
     },
     updateCommittee: async function (id, data) {
         if (!supabaseClient) this.init();
-        const { error } = await supabaseClient.from(this.comKey).update(data).eq('id', id);
+        // Explicitly construct payload
+        var payload = {
+            name: data.name,
+            role: data.role,
+            prev_role: data.prev_role || data.previous_role,
+            mobile: data.mobile || data.phone,
+            image: data.image
+        };
+        const { error } = await supabaseClient.from(this.comKey).update(payload).eq('id', id);
         if (error) { 
             console.error('Com update error:', error); 
             return { success: false, error: 'Database error: ' + error.message }; 
