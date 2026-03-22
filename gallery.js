@@ -174,7 +174,7 @@ App.Gallery = {
             this.hideForm();
             await this.render();
         } else {
-            App.toast('Error: ' + res.error, 'error');
+            App.toast('Error saving gallery event: ' + res.error, 'error');
         }
     },
 

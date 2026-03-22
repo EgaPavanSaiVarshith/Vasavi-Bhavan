@@ -102,14 +102,22 @@ App.DB = {
     addCommittee: async function (member) {
         if (!supabaseClient) this.init();
         member.created_at = new Date().toISOString();
+        // Ensure standard fields (pattern from members table)
+        if (member.mobile && !member.phone) member.phone = member.mobile;
+        if (member.prev_role && !member.previous_role) member.previous_role = member.prev_role;
+        
         const { error } = await supabaseClient.from(this.comKey).insert([member]);
-        if (error) { console.error('Com insert error:', error); return { success: false, error: error.message }; }
+        if (error) { console.error('Com insert error:', error); return { success: false, error: 'Database error: ' + error.message }; }
         this._comCache = null; return { success: true };
     },
     updateCommittee: async function (id, data) {
         if (!supabaseClient) this.init();
+        // Ensure standard fields
+        if (data.mobile && !data.phone) data.phone = data.mobile;
+        if (data.prev_role && !data.previous_role) data.previous_role = data.prev_role;
+        
         const { error } = await supabaseClient.from(this.comKey).update(data).eq('id', id);
-        if (error) { console.error('Com update error:', error); return { success: false, error: error.message }; }
+        if (error) { console.error('Com update error:', error); return { success: false, error: 'Database error: ' + error.message }; }
         this._comCache = null; return { success: true };
     },
     deleteCommittee: async function (id) {
@@ -138,7 +146,12 @@ App.DB = {
         if (!supabaseClient) this.init();
         item.created_at = new Date().toISOString();
         const { error } = await supabaseClient.from(this.galKey).insert([item]);
-        if (error) { console.error('Gal insert error:', error); return { success: false, error: error.message }; }
+        if (error) { 
+            console.error('Gal insert error:', error); 
+            var msg = error.message;
+            if (msg.includes('too large')) msg = "Images too large for database. Try fewer or smaller photos.";
+            return { success: false, error: msg }; 
+        }
         this._galCache = null; return { success: true };
     },
     updateGallery: async function (id, data) {

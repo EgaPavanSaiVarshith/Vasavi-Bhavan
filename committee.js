@@ -22,6 +22,11 @@ App.Committee = {
             e.preventDefault();
             self._save();
         });
+
+        // Numeric phone filter
+        document.getElementById('comPhone').addEventListener('input', function () { 
+            this.value = this.value.replace(/[^0-9]/g, ''); 
+        });
     },
 
     _setupUpload: function (zoneId, fileId, placeholderId, previewId, imgId, removeId) {
@@ -70,8 +75,8 @@ App.Committee = {
             this.editingId = member.id;
             document.getElementById('comName').value = member.name || '';
             document.getElementById('comRole').value = member.role || '';
-            document.getElementById('comPrevRole').value = member.prev_role || '';
-            document.getElementById('comPhone').value = member.mobile || '';
+            document.getElementById('comPrevRole').value = member.previous_role || member.prev_role || '';
+            document.getElementById('comPhone').value = member.phone || member.mobile || '';
             if (member.image) {
                 this.comPhotoData = member.image;
                 document.getElementById('comPhotoPreview').style.display = 'block';
@@ -101,8 +106,8 @@ App.Committee = {
         var data = {
             name: name,
             role: role,
-            prev_role: prevRole,
-            mobile: mobile
+            previous_role: prevRole,
+            phone: mobile
         };
         if (this.comPhotoData) data.image = this.comPhotoData;
 
@@ -119,7 +124,7 @@ App.Committee = {
             this._hideForm();
             await this.render();
         } else {
-            App.toast('Error: ' + res.error, 'error');
+            App.toast('Error saving committee member: ' + res.error, 'error');
         }
     },
 
@@ -184,7 +189,7 @@ App.Committee = {
                  + '<div class="com-role">' + App.Utils.escapeHtml(m.role) + '</div>'
                  + '<div class="com-name">' + App.Utils.escapeHtml(m.name) + '</div>'
                  + prevText
-                 + '<div class="com-phone">📱 ' + App.Utils.escapeHtml(m.mobile) + '</div>'
+                 + '<div class="com-phone">📱 ' + App.Utils.escapeHtml(m.phone || m.mobile) + '</div>'
                  + '</div></div>';
         });
 
