@@ -528,3 +528,19 @@ tbody td{padding:12px 16px;color:var(--c-text-sec);white-space:nowrap} tbody td:
     gap: 12px !important;
     justify-content: center !important;
 }
+
+/* 🖼️ Gallery Loading States */
+.gal-card.is-loading {
+    opacity: 0.8;
+}
+.gal-card.is-loading .gal-img-box::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+    100% { transform: translateX(100%); }
+}

@@ -65,15 +65,44 @@ App.Gallery = {
 
     _processFile: function (file) {
         if (!file.type.startsWith('image/')) return;
-        if (file.size > 2 * 1024 * 1024) { App.toast('File ' + file.name + ' too large. Max 2MB.', 'error'); return; }
+        // Increase limit slightly since we'll compress them anyway
+        if (file.size > 10 * 1024 * 1024) { App.toast('File ' + file.name + ' too large. Max 10MB.', 'error'); return; }
         
         var self = this;
         var reader = new FileReader();
         reader.onload = function (e) {
-            self.photosData.push(e.target.result);
-            self._renderUploadPreviews();
+            // COMPRESS before adding to the list
+            self._resizeImage(e.target.result, 1200, 1200, function(resized) {
+                self.photosData.push(resized);
+                self._renderUploadPreviews();
+            });
         };
         reader.readAsDataURL(file);
+    },
+
+    // ===== MULTI-PHOTO RESIZING UTILITY =====
+    _resizeImage: function(base64, maxWidth, maxHeight, callback) {
+        var img = new Image();
+        img.onload = function() {
+            var canvas = document.createElement('canvas');
+            var width = img.width;
+            var height = img.height;
+            // Calculate scale
+            if (width > height) {
+                if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+            } else {
+                if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
+            }
+            canvas.width = width; canvas.height = height;
+            var ctx = canvas.getContext('2d');
+            // Background to avoid transparency issues on JPG
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(0,0,width,height);
+            ctx.drawImage(img, 0, 0, width, height);
+            // Export as slightly compressed JPEG
+            callback(canvas.toDataURL('image/jpeg', 0.75));
+        };
+        img.src = base64;
     },
 
     _renderUploadPreviews: function () {
@@ -224,7 +253,8 @@ App.Gallery = {
             
             cards.forEach(function (card) {
                 var id = card.getAttribute('data-id');
-                var event = gallery.find(function(x) { return x.id === id; });
+                // Use String() mapping to ensure ID match between numbers and strings
+                var event = gallery.find(function(x) { return String(x.id) === String(id); });
                 if (!event) return;
                 
                 var photos = event.images || (event.image ? [event.image] : []);
@@ -243,25 +273,15 @@ App.Gallery = {
                     }, 500);
                 }
             });
-        }, 20000); // 20 seconds
+        }, 5000); // Faster 5s interval for better UX
     },
 
     viewEvent: async function (id) {
-        var items = await App.DB.getGallery();
-        var item = items.find(function(x) { return String(x.id) === String(id); });
-        
-        if (!item) return;
-
-        // If data is lightweight, wait for full data before launching viewer
-        if (item._isLight || !item.images) {
-            App.toast('Loading full quality images...', 'info');
-            // We can just rely on getGallery which does bg sync, but we want an immediate result here
-            const { data, error } = await App.DB.client.from('vasavi_gallery').select('*').eq('id', id).single();
-            if (error || !data) {
-                App.toast('Error loading photos: ' + error.message, 'error');
-                return;
-            }
-            item = data;
+        // Fetch full quality details from DB (metadata load doesn't include full 'images' array)
+        var item = await App.DB.getGalleryFull(id);
+        if (!item) {
+            App.toast('Could not load memory details', 'error');
+            return;
         }
         
         this.currentViewItems = item.images || (item.image ? [item.image] : []);

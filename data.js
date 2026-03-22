@@ -232,6 +232,43 @@ App.DB = {
 
         return this._galCache;
     },
+
+    getGalleryFull: async function (id) {
+        if (!supabaseClient) this.init();
+        
+        // 1. Check if we already have full data in the memory cache
+        if (this._galCache) {
+            var cached = this._galCache.find(x => String(x.id) === String(id));
+            // Only return from cache if it actually has the 'images' array populated
+            if (cached && cached.images && cached.images.length > 0) return cached;
+        }
+
+        // 2. Otherwise fetch the specific row from Supabase
+        const { data, error } = await supabaseClient
+            .from(this.galKey)
+            .select('*')
+            .eq('id', id)
+            .single();
+            
+        if (error) {
+            console.error('getGalleryFull error:', error);
+            return null;
+        }
+        
+        // 3. Update the memory cache with this fresh full record
+        if (this._galCache) {
+            var idx = this._galCache.findIndex(x => String(x.id) === String(id));
+            if (idx !== -1) {
+                this._galCache[idx] = data;
+                // Optional: persist the whole cache back to localStorage
+                try { localStorage.setItem(this.galKey, JSON.stringify(this._galCache)); } catch(e) {}
+            } else {
+                this._galCache.push(data);
+            }
+        }
+        
+        return data;
+    },
     addGallery: async function (item) {
         if (!supabaseClient) this.init();
         item.created_at = new Date().toISOString();
