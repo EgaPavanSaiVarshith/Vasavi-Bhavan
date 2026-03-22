@@ -21,37 +21,30 @@ App.DB = {
     // ===== MAIN MEMBERS DATABASE (Instant Load Logic) =====
     getAll: async function (forceRefresh) { 
         if (!supabaseClient) this.init();
-        
-        // If forceRefresh is true, skip cache and localStorage
-        if (forceRefresh) {
-            return await this._syncFromSupabase();
-        }
-
-        if (this._membersCache) return this._membersCache;
-
-        // Try to load from LocalStorage first for an instant feel
+        if (forceRefresh) return await this._syncFromSupabase();
+        if (this._membersCache && this._membersCache.length > 0) return this._membersCache;
         try { 
             var local = localStorage.getItem(this.key);
             if (local) {
-                this._membersCache = JSON.parse(local);
-                // Still sync in background to keep it fresh for next time
-                this._syncFromSupabase(); 
-                return this._membersCache;
+                var parsed = JSON.parse(local);
+                if (parsed && parsed.length > 0) {
+                    this._membersCache = parsed;
+                    this._syncFromSupabase(); 
+                    return this._membersCache;
+                }
             }
         } catch(e) {}
-
         return await this._syncFromSupabase();
-    },
-
-    getByIdSync: function (id) { 
-        if (!this._membersCache) return null;
-        return this._membersCache.find(function (m) { return m.id == id; }) || null; 
     },
 
     _syncFromSupabase: async function() {
         if (!supabaseClient) this.init();
         const { data, error } = await supabaseClient.from(this.key).select('*');
-        if (error) { console.error('Supabase fetch error:', error); return this._membersCache || []; }
+        if (error) { 
+            console.error('Supabase fetch error:', error); 
+            if (window.App && App.toast) App.toast('Fetch error: ' + error.message, 'error');
+            return this._membersCache || []; 
+        }
 
         this._membersCache = (data || []).map(m => Object.assign({ 
             memberName: m.name || 'Unknown', 
@@ -71,14 +64,14 @@ App.DB = {
             createdAt: m.createdAt || m.created_at || new Date().toISOString()
         }, m));
 
-        // Save fresh copy to LocalStorage for next time
-        localStorage.setItem(this.key, JSON.stringify(this._membersCache));
+        // Safety Save
+        try { localStorage.setItem(this.key, JSON.stringify(this._membersCache)); } catch(e) { console.warn('LocalStorage Quota Exceeded'); }
 
         return this._membersCache;
     },
-    getById: async function (id) { 
-        const items = await this.getAll();
-        return items.find(function (m) { return m.id == id; }) || null; 
+    getById: async function (id, forceRefresh) { 
+        const items = await this.getAll(forceRefresh);
+        return items.find(function (m) { return String(m.id) === String(id); }) || null; 
     },
 
     create: function (member) {
@@ -350,8 +343,8 @@ App.DB = {
     },
 
     findByMobile: async function (mobile) { 
-        const items = await this.getAll();
-        return items.find(function (m) { return m.phone === mobile || m.mobileNumber === mobile; }) || null; 
+        const items = await this.getAll(true); // Always fresh for search
+        return items.find(function (m) { return String(m.phone) === String(mobile) || String(m.mobileNumber) === String(mobile); }) || null; 
     },
 
     getByStatus: async function (status) { 

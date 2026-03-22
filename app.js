@@ -16,8 +16,12 @@ App.init = async function () {
     this._setupImageModal();
     this.Committee.init();
     this.Gallery.init();
+    
+    // Initial navigation happens instantly from cache
     var hash = window.location.hash.replace('#', '') || 'dashboard';
     await this.navigate(hash);
+    
+    // Background refresh for fresh data
     this.refreshAll();
     this._checkAlerts();
 };
@@ -172,19 +176,24 @@ App._setupLogout = function () {
 
 // ===== REFRESH ALL =====
 App.refreshAll = async function () { 
-    // Force a fresh fetch from Supabase to ensure UI is up-to-date
-    await App.DB.getAll(true); 
-    await App.DB.getCommittee(true);
-    await App.DB.getGallery(true);
+    // 1. Fresh fetches from Supabase in Parallel (Non-Blocking for UI)
+    // We don't 'await' them individually to avoid sequential waiting
+    var fetchJobs = [
+        App.DB.getAll(true),
+        App.DB.getCommittee(true),
+        App.DB.getGallery(true)
+    ];
     
-    // Run renders in parallel to update the UI
-    await Promise.all([
-        this.Dashboard.render(), 
-        this.Committee.render(), 
-        this.Members.render(), 
-        this.Calendar.render(), 
-        this.Gallery.render()
-    ]);
+    await Promise.allSettled(fetchJobs);
+    
+    // 2. Only re-render the CURRENT view to keep things snappy
+    var v = this.currentView;
+    if (v === 'dashboard') this.Dashboard.render();
+    else if (v === 'committee') this.Committee.render();
+    else if (v === 'members') this.Members.render();
+    else if (v === 'calendar') this.Calendar.render();
+    else if (v === 'gallery') this.Gallery.render();
+    else if (v === 'pending') this._renderPending();
     
     this._checkAlerts(); 
 };
