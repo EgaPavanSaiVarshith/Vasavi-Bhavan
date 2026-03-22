@@ -90,7 +90,11 @@ App.DB = {
         if (!supabaseClient) this.init();
         if (this._comCache && !forceRefresh) return this._comCache;
         const { data, error } = await supabaseClient.from(this.comKey).select('*').order('created_at', { ascending: false });
-        if (error) { console.error('Com fetch error:', error); return this._comCache || []; }
+        if (error) { 
+            console.error('Com fetch error:', error); 
+            if (window.App && App.toast) App.toast('Committee error: ' + error.message, 'error');
+            return this._comCache || []; 
+        }
         this._comCache = data || [];
         try { localStorage.setItem(this.comKey, JSON.stringify(this._comCache)); } catch(e) {}
         return this._comCache;
@@ -99,20 +103,20 @@ App.DB = {
         if (!supabaseClient) this.init();
         member.created_at = new Date().toISOString();
         const { error } = await supabaseClient.from(this.comKey).insert([member]);
-        if (error) { console.error('Com insert error:', error); return false; }
-        this._comCache = null; return true;
+        if (error) { console.error('Com insert error:', error); return { success: false, error: error.message }; }
+        this._comCache = null; return { success: true };
     },
     updateCommittee: async function (id, data) {
         if (!supabaseClient) this.init();
         const { error } = await supabaseClient.from(this.comKey).update(data).eq('id', id);
-        if (error) { console.error('Com update error:', error); return false; }
-        this._comCache = null; return true;
+        if (error) { console.error('Com update error:', error); return { success: false, error: error.message }; }
+        this._comCache = null; return { success: true };
     },
     deleteCommittee: async function (id) {
         if (!supabaseClient) this.init();
         const { error } = await supabaseClient.from(this.comKey).delete().eq('id', id);
-        if (error) { console.error('Com delete error:', error); return false; }
-        this._comCache = null; return true;
+        if (error) { console.error('Com delete error:', error); return { success: false, error: error.message }; }
+        this._comCache = null; return { success: true };
     },
 
     // ===== GALLERY DATABASE (Async) =====
@@ -121,7 +125,11 @@ App.DB = {
         if (!supabaseClient) this.init();
         if (this._galCache && !forceRefresh) return this._galCache;
         const { data, error } = await supabaseClient.from(this.galKey).select('*').order('created_at', { ascending: false });
-        if (error) { console.error('Gal fetch error:', error); return this._galCache || []; }
+        if (error) { 
+            console.error('Gal fetch error:', error); 
+            if (window.App && App.toast) App.toast('Gallery error: ' + error.message, 'error');
+            return this._galCache || []; 
+        }
         this._galCache = data || [];
         try { localStorage.setItem(this.galKey, JSON.stringify(this._galCache)); } catch(e) {}
         return this._galCache;
@@ -130,20 +138,20 @@ App.DB = {
         if (!supabaseClient) this.init();
         item.created_at = new Date().toISOString();
         const { error } = await supabaseClient.from(this.galKey).insert([item]);
-        if (error) { console.error('Gal insert error:', error); return false; }
-        this._galCache = null; return true;
+        if (error) { console.error('Gal insert error:', error); return { success: false, error: error.message }; }
+        this._galCache = null; return { success: true };
     },
     updateGallery: async function (id, data) {
         if (!supabaseClient) this.init();
         const { error } = await supabaseClient.from(this.galKey).update(data).eq('id', id);
-        if (error) { console.error('Gal update error:', error); return false; }
-        this._galCache = null; return true;
+        if (error) { console.error('Gal update error:', error); return { success: false, error: error.message }; }
+        this._galCache = null; return { success: true };
     },
     deleteGallery: async function (id) {
         if (!supabaseClient) this.init();
         const { error } = await supabaseClient.from(this.galKey).delete().eq('id', id);
-        if (error) { console.error('Gal delete error:', error); return false; }
-        this._galCache = null; return true;
+        if (error) { console.error('Gal delete error:', error); return { success: false, error: error.message }; }
+        this._galCache = null; return { success: true };
     },
 
     // Update member (Now Async)

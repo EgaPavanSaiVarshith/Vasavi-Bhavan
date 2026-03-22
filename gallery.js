@@ -159,20 +159,20 @@ App.Gallery = {
             updated_at: new Date().toISOString()
         };
 
-        var success = false;
+        var res = { success: false };
         if (this.editingId) {
-            success = await App.DB.updateGallery(this.editingId, data);
-            if (success) App.toast('Gallery event updated! ✅', 'success');
+            res = await App.DB.updateGallery(this.editingId, data);
+            if (res.success) App.toast('Gallery event updated! ✅', 'success');
         } else {
-            success = await App.DB.addGallery(data);
-            if (success) App.toast('New event added to gallery! 🎉', 'success');
+            res = await App.DB.addGallery(data);
+            if (res.success) App.toast('New event added to gallery! 🎉', 'success');
         }
 
-        if (success) {
+        if (res.success) {
             this.hideForm();
             await this.render();
         } else {
-            App.toast('Error saving to gallery. Please try again.', 'error');
+            App.toast('Error: ' + res.error, 'error');
         }
     },
 

@@ -106,20 +106,20 @@ App.Committee = {
         };
         if (this.comPhotoData) data.image = this.comPhotoData;
 
-        var success = false;
+        var res = { success: false };
         if (this.editingId) {
-            success = await App.DB.updateCommittee(this.editingId, data);
-            if (success) App.toast('Committee member updated!', 'success');
+            res = await App.DB.updateCommittee(this.editingId, data);
+            if (res.success) App.toast('Committee member updated!', 'success');
         } else {
-            success = await App.DB.addCommittee(data);
-            if (success) App.toast('Committee member added!', 'success');
+            res = await App.DB.addCommittee(data);
+            if (res.success) App.toast('Committee member added!', 'success');
         }
         
-        if (success) {
+        if (res.success) {
             this._hideForm();
             await this.render();
         } else {
-            App.toast('Error saving committee member.', 'error');
+            App.toast('Error: ' + res.error, 'error');
         }
     },
 
