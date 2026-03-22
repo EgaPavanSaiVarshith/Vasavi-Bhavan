@@ -5,7 +5,7 @@ var App = window.App || {};
 App.currentView = 'dashboard';
 
 App.init = async function () {
-    this.DB.init(); // NEW: Initialize Supabase first
+    this.DB.init();
     this.Form.init();
     this.Members.init();
     this.Calendar.init();
@@ -16,14 +16,26 @@ App.init = async function () {
     this._setupImageModal();
     this.Committee.init();
     this.Gallery.init();
-    
-    // Initial navigation happens instantly from cache
+
+    // STEP 1: Render INSTANTLY from LocalStorage cache (no network wait)
     var hash = window.location.hash.replace('#', '') || 'dashboard';
-    await this.navigate(hash);
-    
-    // Background refresh for fresh data
-    this.refreshAll();
-    this._checkAlerts();
+    this.currentView = hash;
+    document.querySelectorAll('.view').forEach(function (el) { el.classList.remove('active'); });
+    var t = document.getElementById('view-' + hash); if (t) t.classList.add('active');
+    document.querySelectorAll('.nav-item[data-view]').forEach(function (a) { a.classList.toggle('active', a.getAttribute('data-view') === hash); });
+    var titles = { committee: 'Committee Members', dashboard: 'Dashboard', register: 'Register Member', pending: 'Pending Approvals', members: 'Members List', calendar: 'Calendar', gallery: 'Photo Gallery' };
+    document.getElementById('pageTitle').textContent = titles[hash] || 'Dashboard';
+    window.location.hash = hash;
+
+    // Render from cache immediately (no await needed — will show stale but instant)
+    this._renderCurrentView();
+
+    // STEP 2: Silently fetch fresh data from Supabase in background
+    // Do NOT block the UI — use .then() not await
+    this._backgroundSync().then(function() {
+        App._renderCurrentView();
+        App._checkAlerts();
+    });
 };
 
 // ===== NAVIGATION =====
@@ -175,18 +187,17 @@ App._setupLogout = function () {
 };
 
 // ===== REFRESH ALL =====
-App.refreshAll = async function () { 
-    // 1. Fresh fetches from Supabase in Parallel (Non-Blocking for UI)
-    // We don't 'await' them individually to avoid sequential waiting
-    var fetchJobs = [
+// Background sync: fetch all 3 tables in parallel, NO awaiting in sequence
+App._backgroundSync = async function() {
+    await Promise.allSettled([
         App.DB.getAll(true),
         App.DB.getCommittee(true),
         App.DB.getGallery(true)
-    ];
-    
-    await Promise.allSettled(fetchJobs);
-    
-    // 2. Only re-render the CURRENT view to keep things snappy
+    ]);
+};
+
+// Only render the currently visible view
+App._renderCurrentView = function() {
     var v = this.currentView;
     if (v === 'dashboard') this.Dashboard.render();
     else if (v === 'committee') this.Committee.render();
@@ -194,8 +205,13 @@ App.refreshAll = async function () {
     else if (v === 'calendar') this.Calendar.render();
     else if (v === 'gallery') this.Gallery.render();
     else if (v === 'pending') this._renderPending();
-    
-    this._checkAlerts(); 
+};
+
+// refreshAll: sync then re-render current view only
+App.refreshAll = async function () {
+    await this._backgroundSync();
+    this._renderCurrentView();
+    this._checkAlerts();
 };
 
 // ===== TOAST =====

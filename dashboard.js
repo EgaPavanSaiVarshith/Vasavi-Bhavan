@@ -3,12 +3,15 @@
    ================================================================ */
 var App = window.App || {};
 App.Dashboard = {
-    render: async function () { 
-        await this._metrics(); 
-        await this._birthdays(); 
-        await this._anniversaries(); 
-        await this._upcoming(); 
-        await this._recent(); 
+    render: async function () {
+        // Fire all fetches in parallel — much faster than sequential awaits
+        await Promise.allSettled([
+            this._metrics(),
+            this._birthdays(),
+            this._anniversaries(),
+            this._upcoming(),
+            this._recent()
+        ]);
     },
 
     _metrics: async function () {
