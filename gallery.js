@@ -101,7 +101,7 @@ App.Gallery = {
         this._renderUploadPreviews();
     },
 
-    showForm: function (id) {
+    showForm: async function (id) {
         this.resetForm();
         var container = document.getElementById('galleryFormContainer');
         container.style.display = 'block';
@@ -109,7 +109,7 @@ App.Gallery = {
 
         if (id) {
             this.editingId = id;
-            var items = App.DB.getGallery();
+            var items = await App.DB.getGallery();
             var item = items.find(function(x) { return x.id === id; });
             if (item) {
                 document.getElementById('galId').value = item.id;
@@ -140,7 +140,7 @@ App.Gallery = {
         document.getElementById('saveGalBtn').textContent = 'Save to Gallery';
     },
 
-    handleSubmit: function () {
+    handleSubmit: async function () {
         var title = document.getElementById('galTitle').value.trim();
         var date = document.getElementById('galDate').value;
         var category = document.getElementById('galCategory').value;
@@ -155,24 +155,30 @@ App.Gallery = {
             date: date, 
             category: category, 
             images: this.photosData,
-            image: this.photosData[0] // Fallback for any legacy code
+            image: this.photosData[0], // Fallback for any legacy code
+            updated_at: new Date().toISOString()
         };
 
+        var success = false;
         if (this.editingId) {
-            App.DB.updateGallery(this.editingId, data);
-            App.toast('Gallery event updated! ✅', 'success');
+            success = await App.DB.updateGallery(this.editingId, data);
+            if (success) App.toast('Gallery event updated! ✅', 'success');
         } else {
-            App.DB.addGallery(data);
-            App.toast('New event added to gallery! 🎉', 'success');
+            success = await App.DB.addGallery(data);
+            if (success) App.toast('New event added to gallery! 🎉', 'success');
         }
 
-        this.hideForm();
-        this.render();
+        if (success) {
+            this.hideForm();
+            await this.render();
+        } else {
+            App.toast('Error saving to gallery. Please try again.', 'error');
+        }
     },
 
-    render: function () {
+    render: async function () {
         var container = document.getElementById('galleryContainer');
-        var items = App.DB.getGallery();
+        var items = await App.DB.getGallery();
 
         if (!items.length) {
             container.innerHTML = '<div class="empty-state" style="grid-column:1/-1; padding:60px"><h3>No memories yet</h3><p>Showcase the events the committee has organized.</p></div>';
@@ -205,13 +211,13 @@ App.Gallery = {
         this._startSlideshow();
     },
 
-    _startSlideshow: function () {
+    _startSlideshow: async function () {
         var self = this;
         if (this.slideshowInterval) clearInterval(this.slideshowInterval);
         
+        var gallery = await App.DB.getGallery();
         this.slideshowInterval = setInterval(function () {
             var cards = document.querySelectorAll('.gal-card');
-            var gallery = App.DB.getGallery();
             
             cards.forEach(function (card) {
                 var id = card.getAttribute('data-id');
@@ -237,8 +243,9 @@ App.Gallery = {
         }, 30000); // 30 seconds
     },
 
-    viewEvent: function (id) {
-        var item = App.DB.getGallery().find(function(x) { return x.id === id; });
+    viewEvent: async function (id) {
+        var items = await App.DB.getGallery();
+        var item = items.find(function(x) { return x.id === id; });
         if (!item) return;
         
         this.currentViewItems = item.images || (item.image ? [item.image] : []);
@@ -276,11 +283,11 @@ App.Gallery = {
         this._updateModal();
     },
 
-    delete: function (id) {
+    delete: async function (id) {
         if (confirm('Are you sure you want to remove this memory from the gallery?')) {
-            App.DB.deleteGallery(id);
+            await App.DB.deleteGallery(id);
             App.toast('Removed from gallery', 'info');
-            this.render();
+            await this.render();
         }
     }
 };

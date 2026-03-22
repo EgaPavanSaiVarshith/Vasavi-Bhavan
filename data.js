@@ -84,53 +84,66 @@ App.DB = {
         return member;
     },
 
-    // ===== COMMITTEE DATABASE =====
-    getCommittee: function () {
-        var data = localStorage.getItem(this.comKey);
-        return data ? JSON.parse(data) : [];
+    // ===== COMMITTEE DATABASE (Async) =====
+    _comCache: null,
+    getCommittee: async function (forceRefresh) {
+        if (!supabaseClient) this.init();
+        if (this._comCache && !forceRefresh) return this._comCache;
+        const { data, error } = await supabaseClient.from(this.comKey).select('*').order('created_at', { ascending: false });
+        if (error) { console.error('Com fetch error:', error); return this._comCache || []; }
+        this._comCache = data || [];
+        try { localStorage.setItem(this.comKey, JSON.stringify(this._comCache)); } catch(e) {}
+        return this._comCache;
     },
-    saveCommittee: function (members) {
-        localStorage.setItem(this.comKey, JSON.stringify(members));
+    addCommittee: async function (member) {
+        if (!supabaseClient) this.init();
+        member.created_at = new Date().toISOString();
+        const { error } = await supabaseClient.from(this.comKey).insert([member]);
+        if (error) { console.error('Com insert error:', error); return false; }
+        this._comCache = null; return true;
     },
-    addCommittee: function (member) {
-        var c = this.getCommittee();
-        member.id = 'COM-' + Date.now();
-        c.unshift(member);
-        this.saveCommittee(c);
-        return member;
+    updateCommittee: async function (id, data) {
+        if (!supabaseClient) this.init();
+        const { error } = await supabaseClient.from(this.comKey).update(data).eq('id', id);
+        if (error) { console.error('Com update error:', error); return false; }
+        this._comCache = null; return true;
     },
-    updateCommittee: function (id, data) {
-        var c = this.getCommittee(), idx = c.findIndex(function(x) { return x.id === id; });
-        if (idx !== -1) { c[idx] = Object.assign(c[idx], data); this.saveCommittee(c); }
-    },
-    deleteCommittee: function (id) {
-        var c = this.getCommittee();
-        this.saveCommittee(c.filter(function(x) { return x.id !== id; }));
+    deleteCommittee: async function (id) {
+        if (!supabaseClient) this.init();
+        const { error } = await supabaseClient.from(this.comKey).delete().eq('id', id);
+        if (error) { console.error('Com delete error:', error); return false; }
+        this._comCache = null; return true;
     },
 
-    // ===== GALLERY DATABASE =====
-    getGallery: function () {
-        var data = localStorage.getItem(this.galKey);
-        return data ? JSON.parse(data) : [];
+    // ===== GALLERY DATABASE (Async) =====
+    _galCache: null,
+    getGallery: async function (forceRefresh) {
+        if (!supabaseClient) this.init();
+        if (this._galCache && !forceRefresh) return this._galCache;
+        const { data, error } = await supabaseClient.from(this.galKey).select('*').order('created_at', { ascending: false });
+        if (error) { console.error('Gal fetch error:', error); return this._galCache || []; }
+        this._galCache = data || [];
+        try { localStorage.setItem(this.galKey, JSON.stringify(this._galCache)); } catch(e) {}
+        return this._galCache;
     },
-    saveGallery: function (items) {
-        localStorage.setItem(this.galKey, JSON.stringify(items));
+    addGallery: async function (item) {
+        if (!supabaseClient) this.init();
+        item.created_at = new Date().toISOString();
+        const { error } = await supabaseClient.from(this.galKey).insert([item]);
+        if (error) { console.error('Gal insert error:', error); return false; }
+        this._galCache = null; return true;
     },
-    addGallery: function (item) {
-        var g = this.getGallery();
-        item.id = 'GAL-' + Date.now();
-        item.createdAt = new Date().toISOString();
-        g.unshift(item);
-        this.saveGallery(g);
-        return item;
+    updateGallery: async function (id, data) {
+        if (!supabaseClient) this.init();
+        const { error } = await supabaseClient.from(this.galKey).update(data).eq('id', id);
+        if (error) { console.error('Gal update error:', error); return false; }
+        this._galCache = null; return true;
     },
-    updateGallery: function (id, data) {
-        var g = this.getGallery(), idx = g.findIndex(function(x) { return x.id === id; });
-        if (idx !== -1) { g[idx] = Object.assign(g[idx], data); this.saveGallery(g); }
-    },
-    deleteGallery: function (id) {
-        var g = this.getGallery();
-        this.saveGallery(g.filter(function(x) { return x.id !== id; }));
+    deleteGallery: async function (id) {
+        if (!supabaseClient) this.init();
+        const { error } = await supabaseClient.from(this.galKey).delete().eq('id', id);
+        if (error) { console.error('Gal delete error:', error); return false; }
+        this._galCache = null; return true;
     },
 
     // Update member (Now Async)

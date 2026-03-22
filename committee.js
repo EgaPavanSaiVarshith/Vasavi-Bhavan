@@ -87,7 +87,7 @@ App.Committee = {
         document.getElementById('showCommitteeFormBtn').style.display = 'block';
     },
 
-    _save: function() {
+    _save: async function() {
         var name = document.getElementById('comName').value.trim();
         var role = document.getElementById('comRole').value;
         var prevRole = document.getElementById('comPrevRole').value.trim();
@@ -106,28 +106,34 @@ App.Committee = {
         };
         if (this.comPhotoData) data.image = this.comPhotoData;
 
+        var success = false;
         if (this.editingId) {
-            App.DB.updateCommittee(this.editingId, data);
-            App.toast('Committee member updated!', 'success');
+            success = await App.DB.updateCommittee(this.editingId, data);
+            if (success) App.toast('Committee member updated!', 'success');
         } else {
-            App.DB.addCommittee(data);
-            App.toast('Committee member added!', 'success');
+            success = await App.DB.addCommittee(data);
+            if (success) App.toast('Committee member added!', 'success');
         }
         
-        this._hideForm();
-        this.render();
-    },
-
-    deleteMember: function(id) {
-        if (confirm('Are you sure you want to remove this committee member?')) {
-            App.DB.deleteCommittee(id);
-            App.toast('Member removed', 'success');
-            this.render();
+        if (success) {
+            this._hideForm();
+            await this.render();
+        } else {
+            App.toast('Error saving committee member.', 'error');
         }
     },
 
-    editMember: function(id) {
-        var c = App.DB.getCommittee().find(function(m) { return m.id === id; });
+    deleteMember: async function(id) {
+        if (confirm('Are you sure you want to remove this committee member?')) {
+            await App.DB.deleteCommittee(id);
+            App.toast('Member removed', 'success');
+            await this.render();
+        }
+    },
+
+    editMember: async function(id) {
+        var items = await App.DB.getCommittee();
+        var c = items.find(function(m) { return m.id === id; });
         if (c) this._showForm(c);
     },
 
