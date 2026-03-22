@@ -89,6 +89,23 @@ App.DB = {
     getCommittee: async function (forceRefresh) {
         if (!supabaseClient) this.init();
         if (this._comCache && !forceRefresh) return this._comCache;
+
+        // Instant feel from LocalStorage
+        if (!this._comCache) {
+            try {
+                var local = localStorage.getItem(this.comKey);
+                if (local) {
+                    this._comCache = JSON.parse(local);
+                    this._syncCommittee(); // Refresh in background
+                    return this._comCache;
+                }
+            } catch(e) {}
+        }
+        return await this._syncCommittee();
+    },
+
+    _syncCommittee: async function() {
+        if (!supabaseClient) this.init();
         const { data, error } = await supabaseClient.from(this.comKey).select('*').order('created_at', { ascending: false });
         if (error) { 
             console.error('Com fetch error:', error); 
@@ -97,6 +114,12 @@ App.DB = {
         }
         this._comCache = data || [];
         try { localStorage.setItem(this.comKey, JSON.stringify(this._comCache)); } catch(e) {}
+        
+        // Re-render committee if visible
+        if (window.App && App.Committee && App.currentView === 'committee') {
+            App.Committee.render();
+        }
+        
         return this._comCache;
     },
     addCommittee: async function (member) {
@@ -147,6 +170,23 @@ App.DB = {
     getGallery: async function (forceRefresh) {
         if (!supabaseClient) this.init();
         if (this._galCache && !forceRefresh) return this._galCache;
+
+        // Instant feel from LocalStorage
+        if (!this._galCache) {
+            try {
+                var local = localStorage.getItem(this.galKey);
+                if (local) {
+                    this._galCache = JSON.parse(local);
+                    this._syncGallery(); // Refresh in background
+                    return this._galCache;
+                }
+            } catch(e) {}
+        }
+        return await this._syncGallery();
+    },
+
+    _syncGallery: async function() {
+        if (!supabaseClient) this.init();
         const { data, error } = await supabaseClient.from(this.galKey).select('*').order('created_at', { ascending: false });
         if (error) { 
             console.error('Gal fetch error:', error); 
@@ -155,6 +195,12 @@ App.DB = {
         }
         this._galCache = data || [];
         try { localStorage.setItem(this.galKey, JSON.stringify(this._galCache)); } catch(e) {}
+        
+        // Re-render gallery if it's currently visible
+        if (window.App && App.Gallery && App.currentView === 'gallery') {
+            App.Gallery.render();
+        }
+        
         return this._galCache;
     },
     addGallery: async function (item) {

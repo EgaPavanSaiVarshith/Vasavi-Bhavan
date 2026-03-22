@@ -152,11 +152,13 @@ App._setupLogout = function () {
 
 // ===== REFRESH ALL =====
 App.refreshAll = async function () { 
-    await this.Dashboard.render(); 
-    await this.Committee.render(); 
-    await this.Members.render(); 
-    await this.Calendar.render(); 
-    await this._checkAlerts(); 
+    // Run renders in parallel to make transitions instant
+    this.Dashboard.render(); 
+    this.Committee.render(); 
+    this.Members.render(); 
+    this.Calendar.render(); 
+    this.Gallery.render(); // Pre-load gallery data
+    this._checkAlerts(); 
 };
 
 // ===== TOAST =====

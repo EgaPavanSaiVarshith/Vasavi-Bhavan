@@ -195,7 +195,7 @@ App.Gallery = {
 
             return '<div class="gal-card" data-id="' + item.id + '" data-photo-idx="0">' +
                 '<div class="gal-img-box" onclick="App.Gallery.viewEvent(\'' + item.id + '\')">' +
-                '<img class="gal-card-img" src="' + cover + '" alt="' + App.Utils.escapeHtml(item.title) + '">' +
+                '<img class="gal-card-img" src="' + cover + '" alt="' + App.Utils.escapeHtml(item.title) + '" loading="lazy">' +
                 '<div class="gal-overlay"><span>👁️ View ' + count + ' ' + (count > 1 ? 'Photos' : 'Photo') + '</span></div>' +
                 '<div class="gal-badge">' + count + ' 📷</div>' +
                 '</div>' +
