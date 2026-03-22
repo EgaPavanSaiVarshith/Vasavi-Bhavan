@@ -101,14 +101,14 @@ App.DB = {
     },
     addCommittee: async function (member) {
         if (!supabaseClient) this.init();
-        // Explicitly construct payload to prevent accidental column mismatches
+        // Construct payload to match confirmed columns: phone, prev_role, updated_at, image, name, role
         var payload = {
             name: member.name,
             role: member.role,
-            prev_role: member.prev_role || member.previous_role,
-            mobile: member.mobile || member.phone || '',
+            prev_role: member.prev_role,
+            phone: member.phone || member.mobile,
             image: member.image,
-            created_at: new Date().toISOString()
+            updated_at: new Date().toISOString()
         };
         const { error } = await supabaseClient.from(this.comKey).insert([payload]);
         if (error) { 
@@ -119,13 +119,14 @@ App.DB = {
     },
     updateCommittee: async function (id, data) {
         if (!supabaseClient) this.init();
-        // Explicitly construct payload
+        // Use confirmed column names
         var payload = {
             name: data.name,
             role: data.role,
-            prev_role: data.prev_role || data.previous_role,
-            mobile: data.mobile || data.phone,
-            image: data.image
+            prev_role: data.prev_role,
+            phone: data.phone || data.mobile,
+            image: data.image,
+            updated_at: new Date().toISOString()
         };
         const { error } = await supabaseClient.from(this.comKey).update(payload).eq('id', id);
         if (error) { 

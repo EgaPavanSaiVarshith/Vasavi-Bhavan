@@ -107,7 +107,7 @@ App.Committee = {
             name: name,
             role: role,
             prev_role: prevRole,
-            mobile: mobile
+            phone: mobile
         };
         if (this.comPhotoData) data.image = this.comPhotoData;
 
@@ -189,7 +189,7 @@ App.Committee = {
                  + '<div class="com-role">' + App.Utils.escapeHtml(m.role) + '</div>'
                  + '<div class="com-name">' + App.Utils.escapeHtml(m.name) + '</div>'
                  + prevText
-                 + '<div class="com-phone">📱 ' + App.Utils.escapeHtml(m.mobile || m.phone) + '</div>'
+                 + '<div class="com-phone">📱 ' + App.Utils.escapeHtml(m.phone || m.mobile) + '</div>'
                  + '</div></div>';
         });
 
