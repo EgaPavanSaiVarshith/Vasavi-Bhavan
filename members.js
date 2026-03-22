@@ -64,37 +64,37 @@ App.Members = {
         var aadhaarUrl = m.aadhaar || m.aadhaarFile;
         var paymentUrl = m.payment_proof || m.paymentProof;
 
-        var photoHtml = photoUrl ? '<img src="' + photoUrl + '" style="width:110px;height:140px;object-fit:cover;border:1px solid #ccc;display:block">' : '<div style="width:110px;height:140px;border:1px dashed #999;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;text-align:center">Affix Photo<br>Here</div>';
-        var aadhaarHtml = aadhaarUrl ? '<img src="' + aadhaarUrl + '" style="max-width:100%;max-height:160px;border:1px solid #ccc;border-radius:4px">' : '<span style="color:#999;font-size:12px">Not uploaded</span>';
-        var paymentHtml = paymentUrl ? '<img src="' + paymentUrl + '" style="max-width:100%;max-height:160px;border:1px solid #ccc;border-radius:4px">' : '<span style="color:#999;font-size:12px">Not uploaded</span>';
+        var photoHtml = photoUrl ? '<img src="' + photoUrl + '" style="width:100px;height:120px;object-fit:cover;border:1px solid #ccc;display:block">' : '<div style="width:100px;height:120px;border:1px dashed #999;display:flex;align-items:center;justify-content:center;color:#999;font-size:10px;text-align:center">Affix Photo<br>Here</div>';
+        var aadhaarHtml = aadhaarUrl ? '<img src="' + aadhaarUrl + '" style="max-width:100%;max-height:140px;border:1px solid #ccc;border-radius:4px">' : '<span style="color:#999;font-size:12px">Not uploaded</span>';
+        var paymentHtml = paymentUrl ? '<img src="' + paymentUrl + '" style="max-width:100%;max-height:140px;border:1px solid #ccc;border-radius:4px">' : '<span style="color:#999;font-size:12px">Not uploaded</span>';
         var statusColor = m.status === 'approved' ? '#2e7d32' : m.status === 'rejected' ? '#c62828' : '#e65100';
 
         var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Membership Form - ' + esc(m.memberName) + '</title><style>'
-            + '@page { size: A4; margin: 12mm; }'
-            + 'body{font-family:Georgia,serif;padding:0;color:#222;width:186mm;margin:0 auto;font-size:13px;line-height:1.4}'
-            + '.top-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}'
+            + '@page { size: A4; margin: 8mm; }'
+            + 'body{font-family:Georgia,serif;padding:0;color:#222;width:194mm;margin:0 auto;font-size:12px;line-height:1.3}'
+            + '.top-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}'
             + '.top-left{flex:1;text-align:center}'
-            + '.top-right{width:110px;margin-left:20px}'
-            + 'h1{font-size:1.3rem;margin:0;color:#880E4F} h2{font-size:.9rem;margin:4px 0 0;color:#555;font-weight:400}'
-            + '.divider{text-align:center;margin:8px 0;color:#C2185B;font-size:.7rem} .divider::before,.divider::after{content:"";display:inline-block;width:60px;height:1px;background:#ccc;vertical-align:middle;margin:0 12px}'
-            + '.label{text-align:center;font-size:.8rem;color:#880E4F;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}'
-            + '.status{text-align:center;margin-bottom:12px} .status span{padding:3px 12px;border-radius:10px;font-size:.75rem;font-weight:600;color:white;background:' + statusColor + '}'
-            + 'table{width:100%;border-collapse:collapse;margin-bottom:12px} th,td{padding:6px 10px;text-align:left;border-bottom:1px solid #e0e0e0;font-size:.85rem}'
-            + 'th{width:130px;color:#666;font-weight:500} td{color:#222;font-weight:600}'
-            + '.section-title{font-size:.85rem;font-weight:700;color:#880E4F;padding:8px 0 4px;border-bottom:2px solid #880E4F;margin-top:8px}'
-            + '.docs-grid{display:flex;gap:20px;margin-bottom:12px}'
+            + '.top-right{width:100px;margin-left:15px}'
+            + 'h1{font-size:1.15rem;margin:0;color:#880E4F} h2{font-size:.8rem;margin:2px 0 0;color:#555;font-weight:400}'
+            + '.divider{text-align:center;margin:4px 0;color:#C2185B;font-size:.65rem} .divider::before,.divider::after{content:"";display:inline-block;width:50px;height:1px;background:#ccc;vertical-align:middle;margin:0 10px}'
+            + '.label{text-align:center;font-size:.72rem;color:#880E4F;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}'
+            + '.status{text-align:center;margin-bottom:6px} .status span{padding:2px 10px;border-radius:10px;font-size:.7rem;font-weight:600;color:white;background:' + statusColor + '}'
+            + 'table{width:100%;border-collapse:collapse;margin-bottom:8px} th,td{padding:4px 8px;text-align:left;border-bottom:1px solid #e0e0e0;font-size:.8rem}'
+            + 'th{width:120px;color:#666;font-weight:500} td{color:#222;font-weight:600}'
+            + '.section-title{font-size:.8rem;font-weight:700;color:#880E4F;padding:4px 0 2px;border-bottom:2px solid #880E4F;margin-top:4px}'
+            + '.docs-grid{display:flex;gap:15px;margin-bottom:8px}'
             + '.doc-box{flex:1}'
-            + '.disclaimer{background:#FFF8E1;border:1px solid #FFE082;border-radius:6px;padding:10px;margin:16px 0;font-size:.75rem;color:#5D4037;line-height:1.4}'
-            + '.signatures{display:flex;justify-content:space-between;margin-top:20px;padding-top:10px}'
-            + '.sig-box{text-align:center;width:180px} .sig-line{border-top:1px solid #333;padding-top:4px;font-size:.75rem;color:#666}'
-            + '.footer{text-align:center;margin-top:16px;font-size:.7rem;color:#999;border-top:1px solid #ddd;padding-top:8px}'
+            + '.disclaimer{background:#FFF8E1;border:1px solid #FFE082;border-radius:6px;padding:8px;margin:8px 0;font-size:.68rem;color:#5D4037;line-height:1.3}'
+            + '.signatures{display:flex;justify-content:space-between;margin-top:10px;padding-top:5px}'
+            + '.sig-box{text-align:center;width:160px} .sig-line{border-top:1px solid #333;padding-top:4px;font-size:.72rem;color:#666}'
+            + '.footer{text-align:center;margin-top:8px;font-size:.65rem;color:#999;border-top:1px solid #ddd;padding-top:4px}'
             + '@media print{body{padding:0} .disclaimer{border:1px solid #ddd}}'
             + '</style></head><body>'
             + '<div class="top-header">'
             + '<div class="top-left">'
-            + '<div style="margin-bottom:8px"><img src="vasavi-bg.png" style="height:80px;width:auto;object-fit:contain"></div>'
+            + '<div style="margin-bottom:4px"><img src="vasavi-bg.png" style="height:60px;width:auto;object-fit:contain"></div>'
             + '<h1>SRI VASAVI KANYAKA PARAMESHWERI KALYANA MANDAPAM COMITEE</h1>'
-            + '<h2 style="font-size:0.75rem; text-transform:uppercase; font-weight:600; margin-top:6px; color:#555">H.NO-- 5-12, KUSUMANCHI ROAD, NELAKONDAPALLY, KHAMMAM DIST - REGISTERED NUMBER 56/2026</h2>'
+            + '<h2 style="font-size:0.7rem; text-transform:uppercase; font-weight:600; margin-top:4px; color:#555">H.NO-- 5-12, KUSUMANCHI ROAD, NELAKONDAPALLY, KHAMMAM DIST - REGISTERED NUMBER 56/2026</h2>'
             + '<div class="divider">◆</div>'
             + '<div class="label">Membership Application Form</div>'
             + '<div class="status"><span>' + m.status.toUpperCase() + '</span></div>'
@@ -110,14 +110,14 @@ App.Members = {
             + '<tr><th>Address</th><td colspan="3">' + esc(m.address) + '</td></tr></table>'
             
             + '<div class="section-title">💳 Membership Fee & Receipt</div>'
-            + '<table style="background:#f9f9f9; border:1px solid #ddd"><tr><th>Membership Fee</th><td style="font-size:1.1rem; color:#880E4F">₹ 1,000 /-</td><th>Payment Status</th><td style="color:green; font-weight:bold">✔ PAID</td></tr></table>'
+            + '<table style="background:#f9f9f9; border:1px solid #ddd"><tr><th>Membership Fee</th><td style="font-size:1rem; color:#880E4F">₹ 1,000 /-</td><th>Payment Status</th><td style="color:green; font-weight:bold">✔ PAID</td></tr></table>'
 
             + '<div class="docs-grid">'
             + '<div class="doc-box"><div class="section-title" style="margin-top:0">🆔 Identity Proof</div><div style="padding:8px 0">' + aadhaarHtml + '</div></div>'
             + '<div class="doc-box"><div class="section-title" style="margin-top:0">📑 Payment Proof</div><div style="padding:8px 0">' + paymentHtml + '</div></div>'
             + '</div>'
             + '<div class="disclaimer"><strong>⚖️ Disclaimer:</strong> The management of Sri Vasavi Kanyakaparameshwari Kalyana Mandapam Committee reserves the right to accept or reject any membership application without providing a reason.</div>'
-            + '<div class="signatures"><div class="sig-box" style="margin-top:60px"><div class="sig-line">Applicant Signature</div></div><div class="sig-box" style="margin-top:60px"><div class="sig-line">For Committee Use</div></div></div>'
+            + '<div class="signatures"><div class="sig-box" style="margin-top:40px"><div class="sig-line">Applicant Signature</div></div><div class="sig-box" style="margin-top:40px"><div class="sig-line">For Committee Use</div></div></div>'
             + '<div class="footer">Generated on ' + new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) + ' • Sri Vasavi Kanyakaparameshwari Kalyana Mandapam Committee</div>'
             + '</body></html>';
 
