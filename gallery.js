@@ -273,7 +273,7 @@ App.Gallery = {
                     }, 500);
                 }
             });
-        }, 5000); // Faster 5s interval for better UX
+        }, 15000); // 15 seconds as requested
     },
 
     viewEvent: async function (id) {
