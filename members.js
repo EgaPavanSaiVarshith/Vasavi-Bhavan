@@ -70,7 +70,8 @@ App.Members = {
         var statusColor = m.status === 'approved' ? '#2e7d32' : m.status === 'rejected' ? '#c62828' : '#e65100';
 
         var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Membership Form - ' + esc(m.memberName) + '</title><style>'
-            + 'body{font-family:Georgia,serif;padding:20px;color:#222;max-width:800px;margin:0 auto;font-size:13px;line-height:1.4}'
+            + '@page { size: A4; margin: 12mm; }'
+            + 'body{font-family:Georgia,serif;padding:0;color:#222;width:186mm;margin:0 auto;font-size:13px;line-height:1.4}'
             + '.top-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}'
             + '.top-left{flex:1;text-align:center}'
             + '.top-right{width:110px;margin-left:20px}'

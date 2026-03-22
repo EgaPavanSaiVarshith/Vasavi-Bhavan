@@ -267,7 +267,7 @@ tbody td{padding:12px 16px;color:var(--c-text-sec);white-space:nowrap} tbody td:
 .notif-empty{text-align:center;color:var(--c-text-muted);padding:40px 0;font-size:.9rem}
 
 /* ===== PRINT ===== */
-@media print{.sidebar,.topbar,.sidebar-overlay,.toast-container,.notif-panel,.notif-overlay,.modal-overlay,.members-toolbar,.pagination,.td-actions,.btn,.form-actions,.search-box,.toolbar-group,.filter-select,.bg-watermark{display:none!important} .main-wrapper{margin-left:0!important} body{background:#fff;color:#000} .view{display:block!important} .table-wrap{border:1px solid #ccc} table{font-size:11px} thead th{background:#f5f5f5;color:#333;border-bottom:2px solid #333} tbody td{color:#333;border-bottom:1px solid #ddd}}
+@media print{ @page { size: A4; margin: 10mm; } .sidebar,.topbar,.sidebar-overlay,.toast-container,.notif-panel,.notif-overlay,.modal-overlay,.members-toolbar,.pagination,.td-actions,.btn,.form-actions,.search-box,.toolbar-group,.filter-select,.bg-watermark{display:none!important} .main-wrapper{margin-left:0!important} body{background:#fff;color:#000} .view{display:block!important} .table-wrap{border:1px solid #ccc} table{font-size:11px} thead th{background:#f5f5f5;color:#333;border-bottom:2px solid #333} tbody td{color:#333;border-bottom:1px solid #ddd}}
 
 /* ===== GALLERY ===== */
 .gallery-grid {
