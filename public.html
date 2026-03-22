@@ -296,13 +296,31 @@
         loadApplications();
     }
 
-    // ===== LOAD DATA =====
+    // ===== LOAD DATA (Instant Cache + Background Sync) =====
     async function loadApplications() {
-        var { data, error } = await db.from('vasavi_members').select('id,name,phone,dob,father_name,gothram,blood_group,address,status,photo,aadhaar,payment_proof,created_at').order('created_at', { ascending: false });
+        // 1. Instant load from cache
+        try {
+            var cached = localStorage.getItem('approvalsCache');
+            if (cached) {
+                allApps = JSON.parse(cached);
+                updateStats();
+                renderCards(currentFilter);
+            }
+        } catch(e) {}
+
+        // 2. Fetch lightweight columns from Supabase (excludes massive aadhaar/payment strings)
+        var { data, error } = await db.from('vasavi_members')
+            .select('id,name,phone,dob,father_name,gothram,blood_group,address,status,photo,created_at')
+            .order('created_at', { ascending: false });
+            
         if (error) { toast('Error loading: ' + error.message, 'err'); return; }
+        
         allApps = data || [];
         updateStats();
         renderCards(currentFilter);
+        
+        // Save to cache
+        try { localStorage.setItem('approvalsCache', JSON.stringify(allApps)); } catch(e) {}
     }
 
     function updateStats() {
@@ -341,8 +359,9 @@
                 : '<div class="app-photo">👤</div>';
             var statusPill = '<span class="status-pill ' + app.status + '">' + app.status + '</span>';
 
-            var aadhaarBtn = app.aadhaar ? '<button class="doc-btn" onclick="viewDoc(\'' + app.id + '\',\'aadhaar\')">🪪 View Aadhaar</button>' : '';
-            var payBtn = app.payment_proof ? '<button class="doc-btn" onclick="viewDoc(\'' + app.id + '\',\'payment\')">🧾 View Payment</button>' : '';
+            // Always show buttons, we will check if docs actually exist when clicked (saves huge payload size)
+            var aadhaarBtn = '<button class="doc-btn" onclick="viewDoc(\'' + app.id + '\',\'aadhaar\')">🪪 View Aadhaar</button>';
+            var payBtn = '<button class="doc-btn" onclick="viewDoc(\'' + app.id + '\',\'payment_proof\')">🧾 View Payment</button>';
 
             var actionBtns = app.status === 'pending'
                 ? '<div class="action-row">' +
@@ -366,7 +385,7 @@
                         '<div class="detail-row"><span class="detail-lbl">Blood Group</span><span class="detail-val">' + (app.blood_group || '—') + '</span></div>' +
                         '<div class="detail-row" style="grid-column:span 2"><span class="detail-lbl">Address</span><span class="detail-val">' + (app.address || '—') + '</span></div>' +
                     '</div>' +
-                    (aadhaarBtn || payBtn ? '<div class="doc-row">' + aadhaarBtn + payBtn + '</div>' : '') +
+                    '<div class="doc-row">' + aadhaarBtn + payBtn + '</div>' +
                     actionBtns +
                 '</div>' +
             '</div>';
@@ -386,17 +405,27 @@
         }
         var app = allApps.find(function(a){ return String(a.id) === String(id); });
         if (app) app.status = status;
+        
+        // Update cache so change persists on reload
+        try { localStorage.setItem('approvalsCache', JSON.stringify(allApps)); } catch(e) {}
+        
         updateStats();
         renderCards(currentFilter);
         toast(status === 'approved' ? '✅ Application Approved!' : '❌ Application Rejected', status === 'approved' ? 'ok' : 'err');
     }
 
-    // ===== VIEW DOCUMENT =====
-    function viewDoc(id, type) {
-        var app = allApps.find(function(a){ return String(a.id) === String(id); });
-        if (!app) return;
-        var src = type === 'aadhaar' ? app.aadhaar : app.payment_proof;
-        if (!src) return;
+    // ===== VIEW DOCUMENT DYNAMICALLY =====
+    async function viewDoc(id, type) {
+        document.getElementById('modalImg').src = ''; // Clear previous
+        toast('Loading document...', 'info');
+        
+        // Fetch only the specific heavy image base64 directly from Supabase on demand
+        var { data, error } = await db.from('vasavi_members').select(type).eq('id', id).single();
+        if (error || !data) { toast('Error loading document', 'err'); return; }
+        
+        var src = data[type];
+        if (!src) { toast('Applicant did not upload this document.', 'err'); return; }
+        
         document.getElementById('modalImg').src = src;
         document.getElementById('imgModal').classList.add('show');
     }
