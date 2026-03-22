@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Apply for Membership - Sri Vasavi Kanyakaparameshwari Kalyana Mandapam Committee">
+    <title>Apply for Membership | SVKP Kalyana Mandapam</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #880E4F;
+            --primary-light: #C2185B;
+            --primary-dark: #560027;
+            --gold: #F9A825;
+            --bg: #0f0f13;
+            --surface: #1a1a24;
+            --surface2: #222232;
+            --border: rgba(255,255,255,0.08);
+            --text: #f0f0f8;
+            --text-sec: rgba(240,240,255,0.65);
+            --error: #ff5252;
+            --success: #4caf50;
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* ===== HERO HEADER ===== */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, #4A0072 100%);
+            padding: 32px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .hero-logo { font-size: 3rem; margin-bottom: 12px; position: relative; }
+        .hero h1 { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 700; color: #fff; position: relative; line-height: 1.4; }
+        .hero h2 { font-size: 0.72rem; color: rgba(255,255,255,0.65); margin-top: 6px; letter-spacing: 0.5px; position: relative; }
+        .hero-divider { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 16px 0 8px; position: relative; }
+        .hero-divider span { color: var(--gold); font-size: 1rem; }
+        .hero-divider::before,.hero-divider::after { content:''; flex:1; max-width:80px; height:1px; background:rgba(255,255,255,0.2); }
+        .hero-tag { font-size: 0.85rem; color: rgba(255,255,255,0.8); font-weight: 500; position: relative; }
+
+        /* ===== MAIN FORM CONTAINER ===== */
+        .container { max-width: 760px; margin: 0 auto; padding: 32px 16px 60px; }
+
+        /* ===== SUCCESS SCREEN ===== */
+        #successScreen {
+            display: none;
+            text-align: center;
+            padding: 60px 24px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid rgba(76,175,80,0.3);
+            margin-top: 32px;
+        }
+        .success-icon { font-size: 4rem; margin-bottom: 20px; }
+        #successScreen h2 { font-size: 1.5rem; color: var(--success); margin-bottom: 12px; }
+        #successScreen p { color: var(--text-sec); font-size: 0.9rem; line-height: 1.7; max-width: 480px; margin: 0 auto 24px; }
+        .app-id-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: inline-block; margin-bottom: 24px; }
+        .app-id-label { font-size: 0.72rem; color: var(--text-sec); text-transform: uppercase; letter-spacing: 1px; }
+        .app-id-value { font-size: 1.5rem; font-weight: 700; color: var(--gold); font-family: monospace; margin-top: 4px; }
+
+        /* ===== FORM CARD ===== */
+        .form-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            padding: 18px 24px;
+            background: linear-gradient(90deg, rgba(136,14,79,0.3), transparent);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-header h3 { font-size: 0.95rem; font-weight: 600; }
+        .card-body { padding: 24px; }
+
+        /* ===== FORM ELEMENTS ===== */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-grid.full { grid-template-columns: 1fr; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.span2 { grid-column: span 2; }
+        label { font-size: 0.78rem; font-weight: 600; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; }
+        label span.req { color: var(--primary-light); margin-left: 2px; }
+        input, select, textarea {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(194,24,91,0.15);
+        }
+        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.25); }
+        select option { background: #222; }
+        textarea { resize: vertical; min-height: 80px; }
+        .form-group.has-error input,
+        .form-group.has-error select,
+        .form-group.has-error textarea { border-color: var(--error); box-shadow: 0 0 0 3px rgba(255,82,82,0.12); }
+        .fg-error { font-size: 0.72rem; color: var(--error); min-height: 16px; }
+
+        /* ===== UPLOAD ZONE ===== */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-zone:hover { border-color: var(--primary-light); background: rgba(194,24,91,0.05); }
+        .upload-zone .uz-icon { font-size: 2rem; margin-bottom: 8px; }
+        .upload-zone .uz-text { font-size: 0.82rem; color: var(--text-sec); }
+        .upload-zone .uz-text strong { color: var(--primary-light); }
+        .upload-zone .uz-size { font-size: 0.72rem; color: rgba(255,255,255,0.3); margin-top: 4px; }
+        .upload-preview { display: none; align-items: center; gap: 12px; background: var(--surface2); border-radius: 8px; padding: 10px 14px; }
+        .upload-preview img { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
+        .upload-preview .file-name { font-size: 0.82rem; color: var(--text-sec); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .upload-preview .remove-btn { background: transparent; border: none; color: var(--error); cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 4px; }
+        .upload-preview .remove-btn:hover { background: rgba(255,82,82,0.1); }
+
+        /* ===== PHOTO FRAME ===== */
+        .photo-upload-wrap { display: flex; gap: 16px; align-items: flex-start; }
+        .photo-frame {
+            width: 110px; height: 130px; flex-shrink: 0;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; overflow: hidden; position: relative;
+        }
+        .photo-frame:hover { border-color: var(--primary-light); }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .photo-frame .photo-ph { font-size: 0.72rem; color: var(--text-sec); text-align: center; padding: 8px; }
+        .photo-frame .photo-ph span { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+        .photo-info { flex: 1; }
+        .photo-info h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+        .photo-info p { font-size: 0.75rem; color: var(--text-sec); line-height: 1.6; }
+
+        /* ===== TERMS ===== */
+        .terms-box {
+            background: rgba(136,14,79,0.08);
+            border: 1px solid rgba(136,14,79,0.2);
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 0.8rem;
+            color: var(--text-sec);
+            line-height: 1.7;
+        }
+        .terms-check { display: flex; align-items: flex-start; gap: 10px; margin-top: 12px; cursor: pointer; }
+        .terms-check input[type="checkbox"] { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; accent-color: var(--primary-light); }
+        .terms-check label { font-size: 0.82rem; font-weight: 500; color: var(--text); text-transform: none; letter-spacing: 0; }
+        #termsError { font-size: 0.72rem; color: var(--error); min-height: 18px; display: block; margin-top: 4px; }
+
+        /* ===== SUBMIT BUTTON ===== */
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(136,14,79,0.4); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== TOAST ===== */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 18px; border-radius: 10px;
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--text); font-size: 0.85rem; min-width: 260px;
+            animation: slideIn 0.3s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .toast-success { border-color: rgba(76,175,80,0.4); background: rgba(76,175,80,0.1); }
+        .toast-error { border-color: rgba(255,82,82,0.4); background: rgba(255,82,82,0.1); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.span2 { grid-column: span 1; }
+            .photo-upload-wrap { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="hero">
+        <div class="hero-logo">🙏</div>
+        <h1>SRI VASAVI KANYAKA PARAMESHWERI<br>KALYANA MANDAPAM COMITEE</h1>
+        <h2>H.NO-- 5-12, KUSUMANCHI ROAD, NELAKONDAPALLY, KHAMMAM DIST — REG. NO: 56/2026</h2>
+        <div class="hero-divider"><span>◆</span></div>
+        <p class="hero-tag">📋 Membership Application Form</p>
+    </div>
+
+    <!-- SUCCESS SCREEN -->
+    <div class="container">
+        <div id="successScreen">
+            <div class="success-icon">✅</div>
+            <h2>Application Submitted!</h2>
+            <p>Thank you for applying for membership. Your application has been received and is under review by the committee. You will be notified once it is approved.</p>
+            <div class="app-id-box">
+                <div class="app-id-label">Your Application ID</div>
+                <div class="app-id-value" id="appIdDisplay">—</div>
+            </div>
+            <p style="font-size:0.8rem; color:rgba(240,240,255,0.4)">Please save this ID for future reference.</p>
+            <br>
+            <button class="submit-btn" style="max-width:280px;margin:0 auto" onclick="location.reload()">➕ Submit Another Application</button>
+        </div>
+
+        <!-- FORM -->
+        <form id="publicForm" style="margin-top:24px">
+
+            <!-- Personal Details -->
+            <div class="form-card">
+                <div class="card-header">
+                    <span>👤</span>
+                    <h3>Personal Details</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Photo -->
+                    <div class="form-group" style="margin-bottom:20px">
+                        <label>Passport Photo <span class="req">*</span></label>
+                        <div class="photo-upload-wrap">
+                            <div class="photo-frame" id="photoFrame" onclick="document.getElementById('photoFileInput').click()">
+                                <img id="photoPreviewImg" alt="photo">
+                                <div class="photo-ph" id="photoPlaceholderPub"><span>📷</span>Click to upload</div>
+                            </div>
+                            <div class="photo-info">
+                                <h4>Passport Size Photo</h4>
+                                <p>Upload a clear passport-size photograph.<br>Accepted: JPG, PNG (Max 2MB)<br>This photo will appear on your membership certificate.</p>
+                                <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handleFileUpload(this,'photo')">
+                                <button type="button" id="removePhotoPub" style="display:none;margin-top:8px;background:transparent;border:1px solid var(--error);color:var(--error);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem" onclick="removeFile('photo')">Remove Photo</button>
+                            </div>
+                        </div>
+                        <span class="fg-error" id="photoError"></span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group span2" id="fg-memberNamePub">
+                            <label>Full Name <span class="req">*</span></label>
+                            <input type="text" id="memberNamePub" placeholder="Enter full name as per Aadhaar">
+                            <span class="fg-error" id="err-memberNamePub"></span>
+                        </div>
+                        <div class="form-group" id="fg-dobPub">
+                            <label>Date of Birth <span class="req">*</span></label>
+                            <input type="date" id="dobPub">
+                            <span class="fg-error" id="err-dobPub"></span>
+                        </div>
+                        <div class="form-group" id="fg-bloodGroupPub">
+                            <label>Blood Group <span class="req">*</span></label>
+                            <select id="bloodGroupPub">
+                                <option value="">Select blood group</option>
+                                <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                                <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+                            </select>
+                            <span class="fg-error" id="err-bloodGroupPub"></span>
+                        </div>
+                        <div class="form-group" id="fg-fatherNamePub">
+                            <label>Father's Name <span class="req">*</span></label>
+                            <input type="text" id="fatherNamePub" placeholder="Father's full name">
+                            <span class="fg-error" id="err-fatherNamePub"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Spouse Name</label>
+                            <input type="text" id="spouseNamePub" placeholder="Spouse's name (if married)">
+                        </div>
+                        <div class="form-group" id="fg-gothramPub">
+                            <label>Gothram <span class="req">*</span></label>
+                            <input type="text" id="gothramPub" placeholder="Enter Gothram">
+                            <span class="fg-error" id="err-gothramPub"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Marriage Anniversary</label>
+                            <input type="date" id="marriageDayPub">
+                        </div>
+                        <div class="form-group" id="fg-mobilePub">
+                            <label>Mobile Number <span class="req">*</span></label>
+                            <input type="tel" id="mobilePub" placeholder="10-digit mobile number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                            <span class="fg-error" id="err-mobilePub"></span>
+                        </div>
+                        <div class="form-group span2" id="fg-addressPub">
+                            <label>Full Address <span class="req">*</span></label>
+                            <textarea id="addressPub" placeholder="Door no., Street, Village/Town, District, Pin code"></textarea>
+                            <span class="fg-error" id="err-addressPub"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="form-card">
+                <div class="card-header">
+                    <span>📄</span>
+                    <h3>Identity & Payment Proof</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Aadhaar Card (Optional)</label>
+                            <div class="upload-zone" id="aadhaarZonePub" onclick="document.getElementById('aadhaarFilePub').click()">
+                                <div class="uz-icon">🪪</div>
+                                <div class="uz-text">Click to upload <strong>Aadhaar</strong></div>
+                                <div class="uz-size">JPG, PNG, PDF (Max 2MB)</div>
+                            </div>
+                            <div class="upload-preview" id="aadhaarPreviewPub">
+                                <img id="aadhaarImgPub" alt="aadhaar">
+                                <span class="file-name" id="aadhaarNamePub"></span>
+                                <button type="button" class="remove-btn" onclick="removeFile('aadhaar')">✕</button>
+                            </div>
+                            <input type="file" id="aadhaarFilePub" accept="image/*,application/pdf" style="display:none" onchange="handleFileUpload(this,'aadhaar')">
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Proof (Optional)</label>
+                            <div class="upload-zone" id="paymentZonePub" onclick="document.getElementById('paymentFilePub').click()">
+                                <div class="uz-icon">🧾</div>
+                                <div class="uz-text">Click to upload <strong>Payment Proof</strong></div>
+                                <div class="uz-size">Membership fee: ₹1,000/-</div>
+                            </div>
+                            <div class="upload-preview" id="paymentPreviewPub">
+                                <img id="paymentImgPub" alt="payment">
+                                <span class="file-name" id="paymentNamePub"></span>
+                                <button type="button" class="remove-btn" onclick="removeFile('payment')">✕</button>
+                            </div>
+                            <input type="file" id="paymentFilePub" accept="image/*,application/pdf" style="display:none" onchange="handleFileUpload(this,'payment')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terms -->
+            <div class="form-card">
+                <div class="card-header"><span>⚖️</span><h3>Declaration</h3></div>
+                <div class="card-body">
+                    <div class="terms-box">
+                        The management of Sri Vasavi Kanyakaparameshwari Kalyana Mandapam Committee reserves the right to accept or reject any membership application without providing a reason. By submitting this application, I confirm that all information provided is true and accurate to the best of my knowledge.
+                        <div class="terms-check">
+                            <input type="checkbox" id="agreeTermsPub">
+                            <label for="agreeTermsPub">I agree to the above terms and conditions and confirm that the information provided is correct.</label>
+                        </div>
+                        <span id="termsErrorPub"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="submit-btn" id="submitPubBtn">
+                <span>📨 Submit Membership Application</span>
+            </button>
+            <p style="text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.3);margin-top:12px">
+                Your application will be reviewed by the committee. This page is for public registration only.
+            </p>
+        </form>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ===== SUPABASE INIT =====
+        const SUPABASE_URL = "https://kgdkogczvsmbbptiuzap.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_ClfcDfNddcRaO0NA5hkXlw_GFCOJkOC";
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ===== FILE DATA STORAGE =====
+        var fileData = { photo: null, aadhaar: null, payment: null };
+
+        function handleFileUpload(input, type) {
+            var file = input.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) { toast('File too large. Max 2MB.', 'error'); input.value = ''; return; }
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                fileData[type] = e.target.result;
+                if (type === 'photo') {
+                    document.getElementById('photoPreviewImg').src = e.target.result;
+                    document.getElementById('photoPreviewImg').style.display = 'block';
+                    document.getElementById('photoPlaceholderPub').style.display = 'none';
+                    document.getElementById('removePhotoPub').style.display = 'inline-block';
+                    document.getElementById('photoError').textContent = '';
+                } else {
+                    var img = document.getElementById(type + 'ImgPub');
+                    var name = document.getElementById(type + 'NamePub');
+                    var preview = document.getElementById(type + 'PreviewPub');
+                    var zone = document.getElementById(type + 'ZonePub');
+                    if (file.type.startsWith('image/')) { img.src = e.target.result; img.style.display = 'block'; }
+                    else img.style.display = 'none';
+                    name.textContent = file.name;
+                    preview.style.display = 'flex';
+                    zone.style.display = 'none';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeFile(type) {
+            fileData[type] = null;
+            if (type === 'photo') {
+                document.getElementById('photoPreviewImg').style.display = 'none';
+                document.getElementById('photoPreviewImg').src = '';
+                document.getElementById('photoPlaceholderPub').style.display = 'flex';
+                document.getElementById('removePhotoPub').style.display = 'none';
+                document.getElementById('photoFileInput').value = '';
+            } else {
+                document.getElementById(type + 'PreviewPub').style.display = 'none';
+                document.getElementById(type + 'ZonePub').style.display = 'block';
+                document.getElementById(type + 'FilePub').value = '';
+            }
+        }
+
+        // ===== VALIDATION =====
+        function validate() {
+            var valid = true;
+            var fields = [
+                { id:'memberNamePub', msg:'Full name is required' },
+                { id:'dobPub', msg:'Date of birth is required' },
+                { id:'bloodGroupPub', msg:'Blood group is required' },
+                { id:'fatherNamePub', msg:"Father's name is required" },
+                { id:'gothramPub', msg:'Gothram is required' },
+                { id:'mobilePub', msg:'Mobile number is required' },
+                { id:'addressPub', msg:'Address is required' }
+            ];
+            document.querySelectorAll('#publicForm .form-group').forEach(function(fg) { fg.classList.remove('has-error'); });
+            fields.forEach(function(f) {
+                var el = document.getElementById(f.id);
+                var fg = document.getElementById('fg-' + f.id);
+                var err = document.getElementById('err-' + f.id);
+                if (!el || !el.value.trim()) {
+                    valid = false;
+                    if (fg) fg.classList.add('has-error');
+                    if (err) err.textContent = f.msg;
+                } else {
+                    if (err) err.textContent = '';
+                }
+            });
+            var mob = document.getElementById('mobilePub').value.trim();
+            if (mob && !/^[0-9]{10}$/.test(mob)) {
+                valid = false;
+                document.getElementById('fg-mobilePub').classList.add('has-error');
+                document.getElementById('err-mobilePub').textContent = 'Enter valid 10-digit number';
+            }
+            if (!fileData.photo) {
+                valid = false;
+                document.getElementById('photoError').textContent = 'Passport photo is required';
+            }
+            var terms = document.getElementById('agreeTermsPub');
+            if (!terms.checked) {
+                valid = false;
+                document.getElementById('termsErrorPub').textContent = 'You must agree to the terms';
+                document.getElementById('termsErrorPub').style.color = 'var(--error)';
+            } else {
+                document.getElementById('termsErrorPub').textContent = '';
+            }
+            return valid;
+        }
+
+        // ===== FORM SUBMIT =====
+        document.getElementById('publicForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!validate()) {
+                var firstErr = document.querySelector('#publicForm .form-group.has-error');
+                if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+            var btn = document.getElementById('submitPubBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> Submitting...';
+
+            try {
+                var payload = {
+                    name: document.getElementById('memberNamePub').value.trim(),
+                    phone: document.getElementById('mobilePub').value.trim(),
+                    dob: document.getElementById('dobPub').value,
+                    father_name: document.getElementById('fatherNamePub').value.trim(),
+                    spouse_name: document.getElementById('spouseNamePub').value.trim(),
+                    gothram: document.getElementById('gothramPub').value.trim(),
+                    blood_group: document.getElementById('bloodGroupPub').value,
+                    marriage_day: document.getElementById('marriageDayPub').value || null,
+                    address: document.getElementById('addressPub').value.trim(),
+                    photo: fileData.photo,
+                    aadhaar: fileData.aadhaar,
+                    payment_proof: fileData.payment,
+                    status: 'pending'
+                };
+
+                var { data, error } = await db.from('vasavi_members').insert([payload]).select('id');
+                if (error) throw error;
+
+                var appId = data && data[0] ? String(data[0].id).slice(-6).toUpperCase() : 'N/A';
+                document.getElementById('appIdDisplay').textContent = 'APP-' + appId;
+                document.getElementById('publicForm').style.display = 'none';
+                document.getElementById('successScreen').style.display = 'block';
+                document.getElementById('successScreen').scrollIntoView({ behavior: 'smooth' });
+
+            } catch(err) {
+                console.error(err);
+                toast('Error submitting: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<span>📨 Submit Membership Application</span>';
+            }
+        });
+
+        // ===== TOAST =====
+        function toast(msg, type) {
+            var c = document.getElementById('toastContainer');
+            var t = document.createElement('div');
+            t.className = 'toast toast-' + (type || 'info');
+            t.innerHTML = (type === 'error' ? '❌ ' : '✅ ') + msg;
+            c.appendChild(t);
+            setTimeout(function() { t.remove(); }, 5000);
+        }
+    </script>
+</body>
+</html>
