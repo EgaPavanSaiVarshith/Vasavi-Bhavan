@@ -187,20 +187,49 @@ App.DB = {
 
     _syncGallery: async function() {
         if (!supabaseClient) this.init();
-        const { data, error } = await supabaseClient.from(this.galKey).select('*').order('created_at', { ascending: false });
-        if (error) { 
-            console.error('Gal fetch error:', error); 
-            if (window.App && App.toast) App.toast('Gallery error: ' + error.message, 'error');
-            return this._galCache || []; 
-        }
-        this._galCache = data || [];
-        try { localStorage.setItem(this.galKey, JSON.stringify(this._galCache)); } catch(e) {}
         
-        // Re-render gallery if it's currently visible
+        // 1. Fetch LIGHTWEIGHT metadata first for instant feel
+        // We exclude the heavy 'images' array which causes the 3-4s lag
+        const { data: lightData, error: e1 } = await supabaseClient
+            .from(this.galKey)
+            .select('id, title, date, category, image, updated_at, created_at')
+            .order('created_at', { ascending: false });
+
+        if (e1) {
+            console.error('Gal light fetch error:', e1);
+            if (window.App && App.toast) App.toast('Gallery error: ' + e1.message, 'error');
+            return this._galCache || [];
+        }
+
+        // Update cache with light data (showing count as "..." for now)
+        this._galCache = (lightData || []).map(item => {
+            // Keep existing full data if we have it in memory already, otherwise use light
+            var existing = this._galCache ? this._galCache.find(x => x.id === item.id) : null;
+            return existing && existing.images ? existing : Object.assign({ _isLight: true }, item);
+        });
+
+        // Trigger immediate render with light data
         if (window.App && App.Gallery && App.currentView === 'gallery') {
             App.Gallery.render();
         }
-        
+
+        // 2. Fetch FULL records in the background to populate slideshows/counts
+        supabaseClient
+            .from(this.galKey)
+            .select('*')
+            .order('created_at', { ascending: false })
+            .then(({ data: fullData, error: e2 }) => {
+                if (!e2 && fullData) {
+                    this._galCache = fullData;
+                    try { localStorage.setItem(this.galKey, JSON.stringify(this._galCache)); } catch(e) {}
+                    
+                    // Re-render again with full data (counts will update, slideshows will start)
+                    if (window.App && App.Gallery && App.currentView === 'gallery') {
+                        App.Gallery.render();
+                    }
+                }
+            });
+
         return this._galCache;
     },
     addGallery: async function (item) {

@@ -190,14 +190,15 @@ App.Gallery = {
         container.innerHTML = items.map(function (item) {
             var dateStr = App.Utils.formatDate(item.date);
             var photos = item.images || (item.image ? [item.image] : []);
-            var count = photos.length;
-            var cover = photos[0];
+            var count = item._isLight ? '...' : (photos.length || 0);
+            var cover = photos[0] || item.image;
+            var label = item._isLight ? 'View Event' : ('View ' + count + ' ' + (count > 1 ? 'Photos' : 'Photo'));
 
-            return '<div class="gal-card" data-id="' + item.id + '" data-photo-idx="0">' +
+            return '<div class="gal-card' + (item._isLight ? ' is-loading' : '') + '" data-id="' + item.id + '" data-photo-idx="0">' +
                 '<div class="gal-img-box" onclick="App.Gallery.viewEvent(\'' + item.id + '\')">' +
                 '<img class="gal-card-img" src="' + cover + '" alt="' + App.Utils.escapeHtml(item.title) + '" loading="lazy">' +
-                '<div class="gal-overlay"><span>👁️ View ' + count + ' ' + (count > 1 ? 'Photos' : 'Photo') + '</span></div>' +
-                '<div class="gal-badge">' + count + ' 📷</div>' +
+                '<div class="gal-overlay"><span>👁️ ' + label + '</span></div>' +
+                (item._isLight ? '' : '<div class="gal-badge">' + count + ' 📷</div>') +
                 '</div>' +
                 '<div class="gal-info">' +
                 '<div class="gal-meta"><span class="gal-cat">' + item.category + '</span><span class="gal-date">' + dateStr + '</span></div>' +
@@ -248,7 +249,20 @@ App.Gallery = {
     viewEvent: async function (id) {
         var items = await App.DB.getGallery();
         var item = items.find(function(x) { return String(x.id) === String(id); });
+        
         if (!item) return;
+
+        // If data is lightweight, wait for full data before launching viewer
+        if (item._isLight || !item.images) {
+            App.toast('Loading full quality images...', 'info');
+            // We can just rely on getGallery which does bg sync, but we want an immediate result here
+            const { data, error } = await App.DB.client.from('vasavi_gallery').select('*').eq('id', id).single();
+            if (error || !data) {
+                App.toast('Error loading photos: ' + error.message, 'error');
+                return;
+            }
+            item = data;
+        }
         
         this.currentViewItems = item.images || (item.image ? [item.image] : []);
         this.currentViewIdx = 0;
