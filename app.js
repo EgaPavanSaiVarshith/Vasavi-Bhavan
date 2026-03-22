@@ -129,7 +129,27 @@ App._renderPending = async function () {
     }).join('');
 };
 
-App.approveMember = async function (id) { await App.DB.approve(id); App.toast('Approved! ✅', 'success'); await App.refreshAll(); await this._renderPending(); };
+App.approveMember = async function (id) { 
+    var m = await App.DB.getById(id);
+    await App.DB.approve(id); 
+    
+    // If member has a committee post set, add them to committee table too
+    if (m && m.presentPost) {
+        await App.DB.addCommittee({
+            name: m.name || m.memberName,
+            role: m.presentPost,
+            prev_role: m.previousPost || '',
+            phone: m.phone || m.mobileNumber,
+            image: m.photo || m.photoData
+        });
+        App.toast('Member approved and added to Committee! 🏛️', 'success');
+    } else {
+        App.toast('Approved! ✅', 'success'); 
+    }
+    
+    await App.refreshAll(); 
+    await this._renderPending(); 
+};
 App.rejectMember = async function (id) { await App.DB.reject(id); App.toast('Rejected', 'warning'); await App.refreshAll(); await this._renderPending(); };
 
 // ===== IMAGE VIEWER MODAL =====
@@ -152,12 +172,20 @@ App._setupLogout = function () {
 
 // ===== REFRESH ALL =====
 App.refreshAll = async function () { 
-    // Run renders in parallel to make transitions instant
-    this.Dashboard.render(); 
-    this.Committee.render(); 
-    this.Members.render(); 
-    this.Calendar.render(); 
-    this.Gallery.render(); // Pre-load gallery data
+    // Force a fresh fetch from Supabase to ensure UI is up-to-date
+    await App.DB.getAll(true); 
+    await App.DB.getCommittee(true);
+    await App.DB.getGallery(true);
+    
+    // Run renders in parallel to update the UI
+    await Promise.all([
+        this.Dashboard.render(), 
+        this.Committee.render(), 
+        this.Members.render(), 
+        this.Calendar.render(), 
+        this.Gallery.render()
+    ]);
+    
     this._checkAlerts(); 
 };
 

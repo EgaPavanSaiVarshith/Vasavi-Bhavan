@@ -137,7 +137,7 @@ App.Form = {
         }
     },
 
-    _searchMember: function () {
+    _searchMember: async function () {
         var mobile = document.getElementById('searchMobile').value.trim();
         var result = document.getElementById('searchResult');
 
@@ -146,7 +146,8 @@ App.Form = {
             return;
         }
 
-        var member = App.DB.findByMobile(mobile);
+        result.innerHTML = '<div class="search-loading">Searching...</div>';
+        var member = await App.DB.findByMobile(mobile);
         if (member) {
             result.innerHTML = '<div class="search-found">✅ Member found: <strong>' + App.Utils.escapeHtml(member.memberName) + '</strong><br><small>Gothram: ' + App.Utils.escapeHtml(member.gothram) + ' • Status: ' + member.status + '</small><br><br><button class="btn btn-primary btn-sm" id="loadFoundMember">Load & Edit Details</button></div>';
             document.getElementById('loadFoundMember').addEventListener('click', function () {
@@ -263,41 +264,70 @@ App.Form = {
             return;
         }
 
-        // Map all form fields to your new Supabase columns
-        var data = {
-            name: document.getElementById('memberName').value.trim(),
-            phone: document.getElementById('mobileNumber').value.trim(),
-            dob: document.getElementById('dob').value,
-            father_name: document.getElementById('fatherName').value.trim(),
-            spouse_name: document.getElementById('spouseName').value.trim(),
-            gothram: document.getElementById('gothram').value.trim(),
-            blood_group: document.getElementById('bloodGroup').value,
-            marriage_day: document.getElementById('marriageDay').value || null,
-            address: document.getElementById('address').value.trim(),
-            photo: this.photoData,
-            aadhaar: this.aadhaarData,
-            payment_proof: this.paymentData,
-            status: 'pending'
-        };
+        const submitBtn = document.getElementById('formSubmit');
+        const oldBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span> Processing...';
 
-        // NEW: Supabase Insert
-        if (!this.supabaseClient) {
-            App.toast('Supabase not initialized! Check connection.', 'error');
-            return;
-        }
+        try {
+            // Map form fields 
+            var data = {
+                name: document.getElementById('memberName').value.trim(),
+                phone: document.getElementById('mobileNumber').value.trim(),
+                dob: document.getElementById('dob').value,
+                father_name: document.getElementById('fatherName').value.trim(),
+                spouse_name: document.getElementById('spouseName').value.trim(),
+                gothram: document.getElementById('gothram').value.trim(),
+                blood_group: document.getElementById('bloodGroup').value,
+                marriage_day: document.getElementById('marriageDay').value || null,
+                address: document.getElementById('address').value.trim(),
+                photo: this.photoData,
+                aadhaar: this.aadhaarData,
+                payment_proof: this.paymentData,
+                present_post: document.getElementById('presentPost') ? document.getElementById('presentPost').value.trim() : null,
+                previous_post: document.getElementById('previousPost') ? document.getElementById('previousPost').value.trim() : null,
+                status: 'pending' // Stay/Move to pending for admin review
+            };
 
-        const { data: res, error } = await this.supabaseClient
-            .from('vasavi_members')
-            .insert([data]);
+            // If it's an update, we should keep/update properties differently
+            if (this.regType === 'edit') {
+                data.status = 'approved'; // Admins can edit directly and keep approved
+            }
 
-        if (error) {
-            console.error(error);
-            App.toast('Error saving data ❌: ' + error.message, 'error');
-        } else {
-            App.toast('Saved successfully ✅', 'success');
-            this.resetForm();
-            this._showStep1();
-            if (window.App && window.App.refreshAll) window.App.refreshAll();
+            if (!this.supabaseClient) {
+                App.toast('Supabase not initialized! Check connection.', 'error');
+                return;
+            }
+
+            let result;
+            if (this.editingId) {
+                // UPDATE Existing
+                result = await this.supabaseClient
+                    .from('vasavi_members')
+                    .update(data)
+                    .eq('id', this.editingId);
+            } else {
+                // INSERT New
+                result = await this.supabaseClient
+                    .from('vasavi_members')
+                    .insert([data]);
+            }
+
+            if (result.error) {
+                console.error(result.error);
+                App.toast('Error saving data ❌: ' + result.error.message, 'error');
+            } else {
+                App.toast('Saved successfully ✅', 'success');
+                this.resetForm();
+                this._showStep1();
+                if (window.App && window.App.refreshAll) await window.App.refreshAll();
+            }
+        } catch (err) {
+            console.error(err);
+            App.toast('An unexpected error occurred', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = oldBtnText;
         }
     },
 

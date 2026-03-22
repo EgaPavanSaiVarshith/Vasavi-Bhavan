@@ -21,19 +21,25 @@ App.DB = {
     // ===== MAIN MEMBERS DATABASE (Instant Load Logic) =====
     getAll: async function (forceRefresh) { 
         if (!supabaseClient) this.init();
-        if (this._membersCache && !forceRefresh) return this._membersCache;
+        
+        // If forceRefresh is true, skip cache and localStorage
+        if (forceRefresh) {
+            return await this._syncFromSupabase();
+        }
+
+        if (this._membersCache) return this._membersCache;
 
         // Try to load from LocalStorage first for an instant feel
-        if (!this._membersCache) {
-            try { 
-                var local = localStorage.getItem(this.key);
-                if (local) {
-                    this._membersCache = JSON.parse(local);
-                    this._syncFromSupabase(); // Start live refresh in background
-                    return this._membersCache;
-                }
-            } catch(e) {}
-        }
+        try { 
+            var local = localStorage.getItem(this.key);
+            if (local) {
+                this._membersCache = JSON.parse(local);
+                // Still sync in background to keep it fresh for next time
+                this._syncFromSupabase(); 
+                return this._membersCache;
+            }
+        } catch(e) {}
+
         return await this._syncFromSupabase();
     },
 
@@ -60,6 +66,8 @@ App.DB = {
             photoData: m.photo || '',
             aadhaarFile: m.aadhaar || '',
             paymentProof: m.payment_proof || '',
+            presentPost: m.present_post || '',
+            previousPost: m.previous_post || '',
             createdAt: m.createdAt || m.created_at || new Date().toISOString()
         }, m));
 
@@ -138,7 +146,9 @@ App.DB = {
             console.error('Com insert error:', error); 
             return { success: false, error: 'Database error: ' + error.message }; 
         }
-        this._comCache = null; return { success: true };
+        this._comCache = null; 
+        try { localStorage.removeItem(this.comKey); } catch(e) {}
+        return { success: true };
     },
     updateCommittee: async function (id, data) {
         if (!supabaseClient) this.init();
@@ -156,13 +166,17 @@ App.DB = {
             console.error('Com update error:', error); 
             return { success: false, error: 'Database error: ' + error.message }; 
         }
-        this._comCache = null; return { success: true };
+        this._comCache = null; 
+        try { localStorage.removeItem(this.comKey); } catch(e) {}
+        return { success: true };
     },
     deleteCommittee: async function (id) {
         if (!supabaseClient) this.init();
         const { error } = await supabaseClient.from(this.comKey).delete().eq('id', id);
         if (error) { console.error('Com delete error:', error); return { success: false, error: error.message }; }
-        this._comCache = null; return { success: true };
+        this._comCache = null; 
+        try { localStorage.removeItem(this.comKey); } catch(e) {}
+        return { success: true };
     },
 
     // ===== GALLERY DATABASE (Async) =====
@@ -279,13 +293,17 @@ App.DB = {
             if (msg.includes('too large')) msg = "Images too large for database. Try fewer or smaller photos.";
             return { success: false, error: msg }; 
         }
-        this._galCache = null; return { success: true };
+        this._galCache = null; 
+        try { localStorage.removeItem(this.galKey); } catch(e) {}
+        return { success: true };
     },
     updateGallery: async function (id, data) {
         if (!supabaseClient) this.init();
         const { error } = await supabaseClient.from(this.galKey).update(data).eq('id', id);
         if (error) { console.error('Gal update error:', error); return { success: false, error: error.message }; }
-        this._galCache = null; return { success: true };
+        this._galCache = null; 
+        try { localStorage.removeItem(this.galKey); } catch(e) {}
+        return { success: true };
     },
     deleteGallery: async function (id) {
         if (!supabaseClient) this.init();
@@ -300,6 +318,7 @@ App.DB = {
         const { error } = await supabaseClient.from(this.key).update(data).eq('id', id);
         if (error) { console.error('Update error:', error); return false; }
         this._membersCache = null; // Clear cache on change
+        try { localStorage.removeItem(this.key); } catch(e) {} // Clear storage too
         return true;
     },
 
